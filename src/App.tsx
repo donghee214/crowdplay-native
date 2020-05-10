@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
+  StyleSheet
 } from 'react-native';
 
 import {
@@ -30,65 +26,43 @@ declare const global: { HermesInternal: null | {} };
 const Stack = createStackNavigator();
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true)
   useEffect(() => {
     // fetch user key
-    setIsLoggedIn(false)
+    setIsLoggedIn(true)
     SplashScreen.hide()
   }, [])
 
   return (
-    <NavigationContainer>
-      {isLoggedIn ? (
-        <Stack.Navigator>
-          <Stack.Screen name="Home" component={Home} />
-        </Stack.Navigator>
-      ) : (
-          <Stack.Navigator>
-            <Stack.Screen name="Login" component={Login} />
+    <SafeAreaView style={styles.safeArea}>
+      <NavigationContainer>
+        {isLoggedIn ? (
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false
+            }}
+          >
+            <Stack.Screen name="Home" component={Home} />
           </Stack.Navigator>
-        )}
-    </NavigationContainer>
+        ) : (
+            <Stack.Navigator
+              screenOptions={{
+                headerShown: false
+              }}
+            >
+              <Stack.Screen name="Login" component={Login} />
+            </Stack.Navigator>
+          )}
+      </NavigationContainer>
+    </SafeAreaView>
+
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+  safeArea: {
+    flex: 1
+  }
 });
 
 export default App;

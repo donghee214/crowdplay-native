@@ -29,10 +29,6 @@ build/
 local.properties
 *.iml
 
-# Visual Studio Code
-#
-.vscode/
-
 # node.js
 #
 node_modules/
@@ -61,3 +57,5 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+android/app/google-services.json

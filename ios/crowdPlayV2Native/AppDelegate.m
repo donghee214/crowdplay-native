@@ -11,6 +11,7 @@
 #import <FlipperKitNetworkPlugin/FlipperKitNetworkPlugin.h>
 #import <SKIOSNetworkPlugin/SKIOSNetworkAdapter.h>
 #import <FlipperKitReactPlugin/FlipperKitReactPlugin.h>
+#import <Firebase.h>
 #import "RNSplashScreen.h"
 
 static void InitializeFlipper(UIApplication *application) {
@@ -31,6 +32,9 @@ static void InitializeFlipper(UIApplication *application) {
 #if DEBUG
   InitializeFlipper(application);
 #endif
+  if ([FIRApp defaultApp] == nil) {
+    [FIRApp configure];
+  }
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
