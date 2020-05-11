@@ -9,6 +9,7 @@ import RoomTile from "../components/RoomTile"
 import firestore from '@react-native-firebase/firestore';
 import { Room } from "../types"
 
+
 const RoomTileContainer = () => {
   const [rooms, setRooms] = useState<Room[]>([])
   const colors = ["#5756FC", "#E586A3", "#88D1D5", "#59C3C3", "#52489C"]
@@ -36,7 +37,7 @@ const RoomTileContainer = () => {
     ))
   }
   return (
-    <ScrollView>
+    <ScrollView horizontal={true} style={styles.roomTileContainer}>
       {renderRooms()}
     </ScrollView>
   )
@@ -44,7 +45,9 @@ const RoomTileContainer = () => {
 
 const styles = StyleSheet.create({
   roomTileContainer: {
-    flex: 1
+    paddingTop: 10,
+    paddingBottom: 10,
+    width: "100%"
   }
 })
 

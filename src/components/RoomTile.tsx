@@ -20,10 +20,10 @@ const RoomTile: React.FC<RoomTileProps> = ({ color }) => {
 const styles = StyleSheet.create({
   tileContainer: {
     width: 125,
-    height: 250,
+    height: 175,
     borderRadius: 20,
     padding: 20,
-    margin: 3,
+    margin: 4,
   }
 })
 
