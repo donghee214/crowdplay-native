@@ -19,7 +19,7 @@ interface ButtonProps{
 }
 
 export default ({ onClick, type = BUTTON_TYPE.PRIMARY, children }: ButtonProps) => (
-  <TouchableOpacity style={styles.buttonContainer}>
+  <TouchableOpacity style={styles.buttonContainer} onPress={onClick}>
     {children}
   </TouchableOpacity>
 )

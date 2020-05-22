@@ -1,68 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import {
-  SafeAreaView,
-  StyleSheet
-} from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import React, { useEffect } from 'react';
 
 import SplashScreen from 'react-native-splash-screen'
 
+import { ApolloProvider } from '@apollo/react-hooks';
+import { SpotifyContextProvider } from "./spotify/spotifyContext"
+import client from "./graphql"
 
-import Home from "./screens/Home"
-import Login from "./screens/Login"
-
+import Routes from "./screens"
 declare const global: { HermesInternal: null | {} };
 
-const Stack = createStackNavigator();
-
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true)
+
   useEffect(() => {
     // fetch user key
-    setIsLoggedIn(true)
     SplashScreen.hide()
   }, [])
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <NavigationContainer>
-        {isLoggedIn ? (
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false
-            }}
-          >
-            <Stack.Screen name="Home" component={Home} />
-          </Stack.Navigator>
-        ) : (
-            <Stack.Navigator
-              screenOptions={{
-                headerShown: false
-              }}
-            >
-              <Stack.Screen name="Login" component={Login} />
-            </Stack.Navigator>
-          )}
-      </NavigationContainer>
-    </SafeAreaView>
-
+    <ApolloProvider client={client}>
+      <SpotifyContextProvider>
+        <Routes />
+      </SpotifyContextProvider>
+    </ApolloProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1
-  }
-});
 
 export default App;

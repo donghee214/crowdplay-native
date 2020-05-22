@@ -77,6 +77,8 @@ target 'crowdPlayV2Native' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
+	pod 'RNEventEmitter', :path => "../node_modules/react-native-events"
+
   target 'crowdPlayV2NativeTests' do
     inherit! :complete
     # Pods for testing

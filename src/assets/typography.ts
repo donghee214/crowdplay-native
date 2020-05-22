@@ -13,9 +13,9 @@ export const fonts = {
 
 export const sizes = {
   lg: 24,
-  md: 16,
-  sm: 14,
-  xs: 12,
+  md: 18,
+  sm: 16,
+  xs: 14,
 }
 
 export const textStyles = StyleSheet.create({

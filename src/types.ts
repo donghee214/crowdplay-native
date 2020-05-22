@@ -77,3 +77,9 @@ export interface Playlist {
     display_name: string
   }
 }
+
+export interface User{
+  id: string
+  display_name: string
+  images: Image[]
+}

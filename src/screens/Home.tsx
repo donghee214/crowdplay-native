@@ -1,79 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react'
 import {
   StyleSheet,
   View,
   Text,
-  TextInput,
-  Alert
-} from 'react-native';
+  SafeAreaView
+} from 'react-native'
 
 import RoomTileContainer from "../components/RoomTileContainer"
+import UserIcon from "../components/UserIcon"
 
 import { textStyles, fonts } from "../assets/typography"
 import colors from "../assets/colors"
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler'
 
-import Button from "../assets/components/Button"
+import { JoinRoom, CreateRoom } from "../components/JoinCreateRoom"
+import SpotifyContext from '../spotify/spotifyContext';
 
 const Home = () => {
-  const [joinRoomInput, setJoinRoomInput] = useState<string>("")
-  const [createRoomInput, setCreateRoomInput] = useState<string>("")
-
   return (
     <ScrollView style={styles.homeContainer}>
-      <View style={styles.paddedScreenContainer}>
-        <Text>
-          <Text style={[textStyles.h1, styles.titleText]}>
-            chocolate
-        </Text>
-          <Text style={[textStyles.h3, styles.titleTextEnd]}>
-            .
-        </Text>
-        </Text>
-        <Text style={[textStyles.p, styles.sectionHeader]}>
-          Join Room
-      </Text>
-        <TextInput
-          style={styles.roomTextInput}
-          value={joinRoomInput}
-          onChangeText={(text: string) => setJoinRoomInput(text)}
-          placeholder={"Enter Room Name"}
-        />
-        <View style={styles.buttonContainer}>
-          <Button onClick={() => "test"}>
-            <Text style={[textStyles.p, styles.buttonText]}>
-              Join Room
+      <SafeAreaView>
+        <View style={styles.paddedScreenContainer}>
+          <View style={styles.topBarContainer}>
+            <Text>
+              <Text style={[textStyles.h1, styles.titleText]}>chocolate</Text>
+              <Text style={[textStyles.h3, styles.titleTextEnd]}>.</Text>
             </Text>
-          </Button>
+            <UserIcon />
+          </View>
+          <JoinRoom />          
+          <CreateRoom />
+          <Text style={[textStyles.p, styles.sectionHeader]}>
+            Nearby
+          </Text>
         </View>
-        <Text style={[textStyles.p, styles.sectionHeader]}>
-          Create Room
-        </Text>
-        <TextInput
-          style={styles.roomTextInput}
-          value={createRoomInput}
-          onChangeText={(text: string) => setCreateRoomInput(text)}
-          placeholder={"Enter Room Name"}
-        />
-        <View style={styles.buttonContainer}>
-          <Button onClick={() => "test"}>
-            <Text style={[textStyles.p, styles.buttonText]}>
-              Create Room
-            </Text>
-          </Button>
-        </View>
-        <Text style={[textStyles.p, styles.sectionHeader]}>
-          Nearby
-      </Text>
-      </View>
-      <RoomTileContainer />
+        <RoomTileContainer />
+      </SafeAreaView>
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
   homeContainer: {
-    paddingVertical: 25
+    paddingVertical: 25,
+    backgroundColor: colors.white
   },
   titleText: {
     fontSize: 32,
@@ -100,12 +70,15 @@ const styles = StyleSheet.create({
   paddedScreenContainer: {
     paddingHorizontal: 25
   },
-  buttonContainer: {
-    marginVertical: 25
+  errorMessage: {
+    marginTop: 4,
+    color: colors.red
   },
-  buttonText: {
-    fontSize: 20,
-    color: colors.white
+  topBarContainer:{
+    display: 'flex',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16
   }
 });
 
