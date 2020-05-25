@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Platform } from 'react-native'
 import AsyncStorage from '@react-native-community/async-storage';
+import { useApolloClient } from '@apollo/react-hooks'
 import {
     auth,
     remote,
@@ -8,18 +9,6 @@ import {
     SpotifyRemoteApi,
     PlayerState,
 } from 'react-native-spotify-remote';
-
-import { CLIENT_ID, REDIRECT_URL, TOKEN_REFRESH_URL } from 'react-native-dotenv'
-
-const SPOTIFY_SERVER = TOKEN_REFRESH_URL
-
-const config = {
-    clientID: CLIENT_ID,
-    redirectURL: REDIRECT_URL,
-    tokenRefreshURL: `${SPOTIFY_SERVER}/refresh`,
-    tokenSwapURL: `${SPOTIFY_SERVER}/swap`,
-    scopes: [ApiScope.AppRemoteControlScope, ApiScope.UserReadPrivateScope, ApiScope.UserReadEmailScope],
-};
 
 interface AuthOptions {
     playURI?: string;
@@ -35,19 +24,34 @@ interface AppContextState {
     isAuthenticated?: boolean;
 }
 
-export interface SessionProps {
-    accessToken: string;
-    expirationDate: string;
-    refreshToken?: string;
-}
+
 
 export interface AppContextProps extends AppContextState {
     authenticate: (options?: AuthOptions) => void;
     endSession: () => void;
     connectRemote: () => void;
     renewSession: (refresh_token: string) => void;
+    withRenew: (spotifyCallback: () => void) => void,
     remote: SpotifyRemoteApi,
 }
+
+export interface SessionProps {
+    accessToken: string;
+    expirationDate: string;
+    refreshToken?: string;
+}
+
+import { CLIENT_ID, REDIRECT_URL, TOKEN_REFRESH_URL } from 'react-native-dotenv'
+
+const SPOTIFY_SERVER = TOKEN_REFRESH_URL
+
+export const config = {
+    clientID: CLIENT_ID,
+    redirectURL: REDIRECT_URL,
+    tokenRefreshURL: `${SPOTIFY_SERVER}/refresh`,
+    tokenSwapURL: `${SPOTIFY_SERVER}/swap`,
+    scopes: [ApiScope.AppRemoteControlScope, ApiScope.UserReadPrivateScope, ApiScope.UserReadEmailScope],
+};
 
 const noop = () => { };
 
@@ -56,83 +60,36 @@ const DefaultContext: AppContextProps = {
     endSession: noop,
     connectRemote: noop,
     renewSession: noop,
+    withRenew: noop,
     remote,
 }
 
 const SpotifyContext = React.createContext<AppContextProps>(DefaultContext);
 
-class SpotifyContextProvider extends React.Component<{}, AppContextState> {
-    state = {
-        isConnected: false,
-        token: ""
-    }
+const SpotifyContextProvider: React.FC = props => {
+    const [isConnected, setIsConnected] = useState(false)
+    const [token, setToken] = useState('')
+    const [playerState, setPlayerState] = useState<PlayerState>()
+    const apolloClient = useApolloClient()
 
-    async componentDidMount() {
-        const session: SessionProps = await this.getLocalSession()
-        const accessToken = (session?.accessToken && !this.isExpired(session.expirationDate)) ? session.accessToken : ""
-        this.setState((state) => ({
-            ...state,
-            token: accessToken,
-        }))
-    }
-
-    componentWillUnmount() {
-        remote.removeAllListeners();
-    }
-
-    private renewSession = async () => {
-        const { refresh_token } = await this.getLocalSession()
-        if (refresh_token) {
-            const response = await fetch(`${SPOTIFY_SERVER}/refresh`, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    refresh_token
-                })
-            })
-            const json = await response.json()
-            this.setState((state) => ({
-                ...state,
-                token: json.access_token
-            }))
+    useEffect(() => {
+        (async () => {
+            const session: SessionProps = await getLocalSession()
+            const accessToken = (session?.accessToken && !isExpired(session.expirationDate)) ? session.accessToken : ""
+            setToken(accessToken)
+        })()
+        return () => {
+            remote.removeAllListeners()
         }
-        else {
-            await this.authenticate()
-        }
-    }
+    }, [])
 
-    private isExpired = (expirationDate: string) => {
+    const isExpired = (expirationDate: string) => {
         const expirationDateTime = Date.parse(expirationDate)
         const currDateTime = new Date();
         return currDateTime.getTime() > expirationDateTime
     }
 
-    private onConnected = () => {
-        this.setState((state) => ({
-            ...state,
-            isConnected: true
-        }));
-    }
-
-    private onDisconnected = () => {
-        this.setState((state) => ({
-            ...state,
-            isConnected: false
-        }));
-    }
-
-    private onPlayerStateChanged = (playerState: PlayerState) => {
-        this.setState((state) => ({
-            ...state,
-            playerState
-        }))
-    };
-
-
-    private getLocalSession = async () => {
+    const getLocalSession = async () => {
         try {
             const sessionString = await AsyncStorage.getItem('@session')
             const session = JSON.parse(sessionString!)
@@ -144,7 +101,7 @@ class SpotifyContextProvider extends React.Component<{}, AppContextState> {
         }
     }
 
-    private saveSessionLocally = async (session: SessionProps) => {
+    const saveSessionLocally = async (session: SessionProps) => {
         try {
             AsyncStorage.setItem('@session', JSON.stringify(session))
         }
@@ -154,72 +111,101 @@ class SpotifyContextProvider extends React.Component<{}, AppContextState> {
         }
     }
 
-    withRenew = async (spotifyCallback: () => void)  => {
-        try {
-            spotifyCallback()
+    const renewSession = async () => {
+        const { refreshToken } = await getLocalSession()
+        if (refreshToken) {
+            const response = await fetch(`${SPOTIFY_SERVER}/refresh`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    refresh_token: refreshToken
+                })
+            })
+            const json = await response.json()
+            setToken(json.access_token)
         }
-        catch (error) {
-            if (error.status === 401) {
-                await this.renewSession()
-                await this.connectRemote()
-                spotifyCallback()
-            }
+        else {
+            await authenticate()
         }
     }
 
-    authenticate = async () => {
-        await this.endSession()
+    const authenticate = async () => {
+        await endSession()
         const session = await auth.authorize(config)
-        this.setState((state) => ({
-            ...state,
-            token: session.accessToken
-        }))
-        await this.saveSessionLocally(session)
+        setToken(session.refreshToken)
+        await saveSessionLocally(session)
     }
 
-
-    endSession = async () => {
+    const endSession = async () => {
         await remote.disconnect()
         await auth.endSession()
-        this.setState((state) => ({
-            ...state,
-            isConnected: false,
-            token: "",
-        }))
+        setToken('')
+        setIsConnected(false)
     }
 
-    connectRemote = async () => {
-        if (this.state.token) {
-            try {
-                remote.connect(this.state.token);
+    const onConnected = () => {
+        setIsConnected(true)
+    }
+
+    const onDisconnected = () => {
+        setIsConnected(false)
+    }
+
+    const onPlayerStateChanged = (playerState: PlayerState) => {
+        setPlayerState(playerState)
+    };
+
+    const withRenew = async (spotifyCallback: any) => {
+        try {
+            await spotifyCallback()
+        }
+        catch ({ operation, response, graphQLErrors, networkError, forward }) {
+            if(graphQLErrors){
+                graphQLErrors.map(async (error: any) => {
+                    if(error.extensions.code === "UNAUTHENTICATED"){
+                        await renewSession()
+                        await connectRemote()
+                        spotifyCallback()
+                        return
+                    }
+                });
             }
-            catch (err) {
-                await this.renewSession()
-                await this.connectRemote()
-            }
-            remote.on("remoteConnected", this.onConnected)
-                .on("remoteDisconnected", this.onDisconnected)
-                .on("playerStateChanged", this.onPlayerStateChanged);
         }
     }
 
-    render() {
-        console.log('process')
-        console.log(process.env.CLIENT_ID)
-        const { children } = this.props
-        return (
-            <SpotifyContext.Provider
-                value={{
-                    ...DefaultContext,
-                    ...this.state,
-                    authenticate: this.authenticate,
-                    endSession: this.endSession,
-                    connectRemote: this.connectRemote,
-                }}>
-                {children}
-            </SpotifyContext.Provider>
-        )
+    const connectRemote = async () => {
+        if (token) {
+            try {
+                remote.connect(token);
+            }
+            catch (err) {
+                await renewSession()
+                await connectRemote()
+            }
+            remote.on("remoteConnected", onConnected)
+                .on("remoteDisconnected", onDisconnected)
+                .on("playerStateChanged", onPlayerStateChanged)
+        }
     }
+    return (
+        <SpotifyContext.Provider
+            value={{
+                ...DefaultContext,
+                isConnected,
+                token,
+                playerState,
+                authenticate,
+                endSession,
+                connectRemote,
+                withRenew
+            }}>
+            {props.children}
+        </SpotifyContext.Provider>
+    )
+
 }
 
 export default SpotifyContext;

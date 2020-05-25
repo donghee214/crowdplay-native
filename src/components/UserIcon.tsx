@@ -18,7 +18,7 @@ import { textStyles } from "../assets/typography"
 import { getMeResponseType } from "../screens"
 
 const UserIcon = () => {
-  const { isAuthenticated, token, authenticate, endSession, renewSession } = useContext(SpotifyContext)
+  const { token, authenticate } = useContext(SpotifyContext)
 
   const [getMe, { loading, data, error }] = useLazyQuery<getMeResponseType>(GET_ME, {
     variables: {
@@ -28,16 +28,15 @@ const UserIcon = () => {
   })
 
   const onPressHandler = () => {
-    authenticate()
-    // if(isAuthenticated) Alert.alert("go to settings")
-    // else authenticate()
+    if(token) Alert.alert("go to settings")
+    else authenticate()
   }
 
   return (
     <TouchableOpacity style={styles.imageContainer} onPress={onPressHandler}>
       {data?.me.images ? <Image source={data.me.images[0]} style={styles.image} /> : <Account color={colors.lightGrey} />}
       <Text style={[textStyles.p, styles.nameText]}>
-        {isAuthenticated ? "Settings" : "Sign In"}
+        {token ? "Settings" : "Sign In"}
       </Text>
     </TouchableOpacity>
   )

@@ -14,7 +14,7 @@ export const UPVOTE_SONG = gql`
 
 export const CREATE_ROOM = gql`
     mutation AddRoom($roomId: ID!, $adminId: ID!){
-      addRoom(roomId: $roomId, adminId: $adminId){
+      addRoom(id: $roomId, adminId: $adminId){
         id
       }
     }

@@ -7,6 +7,11 @@ const cache = new InMemoryCache({
 
 const client = new ApolloClient({
   uri: 'http://192.168.0.12:4000/graphql',
+  onError: ({ operation, response, graphQLErrors, networkError, forward}) => {
+    // console.log(response)
+    // console.log(graphQLErrors)
+    // console.log(networkError)
+  },
   cache: cache,
   resolvers: {}
 });

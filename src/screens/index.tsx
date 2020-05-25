@@ -7,7 +7,7 @@ import Home from "./Home"
 
 import { GET_ME } from "../graphql/queries"
 import { useLazyQuery } from '@apollo/react-hooks'
-
+import { useApolloClient } from '@apollo/react-hooks'
 import { User } from "../types"
 
 import SpotifyContext from "../spotify/spotifyContext"
@@ -20,26 +20,25 @@ export interface getMeResponseType {
 const Stack = createStackNavigator();
 
 export default () => {
-  const { isAuthenticated, token, authenticate, endSession } = useContext(SpotifyContext)
+  const { withRenew } = useContext(SpotifyContext)
+  
 
-  const [getMe, { loading, data, error }] = useLazyQuery<getMeResponseType>(GET_ME, {
-    variables: {
-      accessToken: token
-    },
-    fetchPolicy: "no-cache"
-  })
+  const getMe = async () => {
+    const client = useApolloClient()
+    const { token } = useContext(SpotifyContext)
+    const data = await client.query({
+      query: GET_ME,
+      variables: {
+        accessToken: token
+      },
+      fetchPolicy: "network-only",
+      errorPolicy: 'none'
+    })
+  }
 
   useEffect(() => {
-    if (isAuthenticated) {
-      getMe()
-    }
-  }, [isAuthenticated])
-
-  useEffect(() => {
-    if(data){
-
-    }
-  }, [data])
+    withRenew(getMe)
+  }, [])
 
   return (
         <NavigationContainer>
