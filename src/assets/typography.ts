@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import colors from './colors'
 
 export const fonts = {
   montserratLight: "Monsterrat-Light",
@@ -37,3 +38,14 @@ export const textStyles = StyleSheet.create({
   },
 });
 
+export const VotingRoomText = StyleSheet.create({
+  header: {
+    color: colors.lightBlack,
+    fontSize: 30
+  },
+  description: {
+    color: colors.lightGrey,
+    fontSize: 14,
+    paddingLeft: 2
+  }
+})

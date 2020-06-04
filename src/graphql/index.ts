@@ -26,7 +26,8 @@ cache.writeData({
         id: "",
         display_name: "",
         images: null
-      }
+      },
+      roomId: ""
   }
 })
 

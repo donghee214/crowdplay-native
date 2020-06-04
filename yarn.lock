@@ -1040,6 +1040,14 @@
   resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-6.7.1.tgz#f0ccf73b51d73b31e7c9b8896979fa9a129583e3"
   integrity sha512-hODzL694Ar/ao8EAW6QNbYJsqJXyaV7Qzku7TlJop2kIIs+UVzTcSGfnkfrTSJ2wW0ka6sM45asxmfuLkyz0eA==
 
+"@react-navigation/bottom-tabs@^5.5.1":
+  version "5.5.1"
+  resolved "https://registry.yarnpkg.com/@react-navigation/bottom-tabs/-/bottom-tabs-5.5.1.tgz#f1f15ea70e4b397de6f8acafe70a694de08c87b6"
+  integrity sha512-zSv0YD46tEH8RM4sgzpQ/bnV5dAr4bSul52PVY9e2Rc9f3lg5D2tmmPFsN0txWbpImHJcRKZdpAhcc61C+lBVA==
+  dependencies:
+    color "^3.1.2"
+    react-native-iphone-x-helper "^1.2.1"
+
 "@react-navigation/core@^5.5.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@react-navigation/core/-/core-5.5.0.tgz#7cf21567cb00d6ae1c5fd648d5c524205f5880ce"
@@ -5464,6 +5472,11 @@ react-is@^16.12.0, react-is@^16.13.0, react-is@^16.8.1, react-is@^16.8.4, react-
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
+react-native-device-info@^5.6.1:
+  version "5.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-5.6.1.tgz#3ae88d8659b7b64d204dbfc39f69126b769363d4"
+  integrity sha512-FxjenoDZJKT53pp/Tl5gMsw5DA82Y5tOuySQlKS5AaDmw+Bu6EqEJjt0z4TRhJOVoqVJ35oCiZ3xViVbz/hB0w==
 
 react-native-dotenv@^0.2.0:
   version "0.2.0"

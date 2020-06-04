@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from "react"
-import SpotifyContext from "../spotify/spotifyContext"
+import SpotifyContext from "../../spotify/spotifyContext"
 import {
   Text,
   Image,
@@ -8,24 +8,32 @@ import {
   Alert
 } from 'react-native';
 
-import { GET_ME } from "../graphql/queries"
+import { GET_ME } from "../../graphql/queries"
 import { useLazyQuery } from '@apollo/react-hooks'
 
-import Account from "../assets/components/Account"
-import colors from "../assets/colors"
-import { textStyles } from "../assets/typography"
+import Account from "../../assets/components/Account"
+import colors from "../../assets/colors"
+import { textStyles } from "../../assets/typography"
 
-import { getMeResponseType } from "../screens"
+import { getMeResponseType } from "../../screens"
 
 const UserIcon = () => {
   const { token, authenticate } = useContext(SpotifyContext)
 
   const [getMe, { loading, data, error }] = useLazyQuery<getMeResponseType>(GET_ME, {
-    variables: {
-      accessToken: token
-    },
     fetchPolicy: "cache-and-network"
   })
+
+  useEffect(() => {
+    console.log('token from userIcon', token)
+    if(token){
+      getMe({
+        variables: {
+          accessToken: token
+        }
+      })
+    }
+  }, [token])
 
   const onPressHandler = () => {
     if(token) Alert.alert("go to settings")
@@ -36,7 +44,7 @@ const UserIcon = () => {
     <TouchableOpacity style={styles.imageContainer} onPress={onPressHandler}>
       {data?.me.images ? <Image source={data.me.images[0]} style={styles.image} /> : <Account color={colors.lightGrey} />}
       <Text style={[textStyles.p, styles.nameText]}>
-        {token ? "Settings" : "Sign In"}
+        {data?.me ? "Settings" : "Sign In"}
       </Text>
     </TouchableOpacity>
   )

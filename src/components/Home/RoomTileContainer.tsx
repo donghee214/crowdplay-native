@@ -5,9 +5,9 @@ import {
   Text,
   ScrollView
 } from 'react-native';
-import RoomTile from "../components/RoomTile"
+import RoomTile from "./RoomTile"
 import firestore from '@react-native-firebase/firestore';
-import { Room } from "../types"
+import { Room } from "../../types"
 
 
 const RoomTileContainer = () => {

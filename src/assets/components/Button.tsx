@@ -15,11 +15,12 @@ export enum BUTTON_TYPE{
 interface ButtonProps{
   type?: BUTTON_TYPE,
   onClick: any,
-  children: React.ReactNode
+  children: React.ReactNode,
+  disabled?: boolean
 }
 
-export default ({ onClick, type = BUTTON_TYPE.PRIMARY, children }: ButtonProps) => (
-  <TouchableOpacity style={styles.buttonContainer} onPress={onClick}>
+export default ({ onClick, type = BUTTON_TYPE.PRIMARY, children, disabled }: ButtonProps) => (
+  <TouchableOpacity style={styles.buttonContainer} onPress={onClick} disabled={disabled}>
     {children}
   </TouchableOpacity>
 )

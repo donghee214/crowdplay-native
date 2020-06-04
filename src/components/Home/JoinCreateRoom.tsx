@@ -3,37 +3,57 @@ import {
   StyleSheet,
   View,
   Text,
-  TextInput
+  TextInput,
+  ActivityIndicator
 } from 'react-native'
-import SpotifyContext from "../spotify/spotifyContext"
+import SpotifyContext from "../../spotify/spotifyContext"
 
-import Button from "../assets/components/Button"
+import Button from "../../assets/components/Button"
 
-import { textStyles, fonts } from "../assets/typography"
-import colors from "../assets/colors"
+import { textStyles, fonts } from "../../assets/typography"
+import colors from "../../assets/colors"
 
-import { useQuery, useMutation, useLazyQuery } from '@apollo/react-hooks'
-import { GET_ROOM, GET_ME } from "../graphql/queries"
-import { CREATE_ROOM } from "../graphql/mutations"
-import { getMeResponseType } from "../screens"
+import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/react-hooks'
+import { GET_ROOM, GET_ME } from "../../graphql/queries"
+import { CREATE_ROOM } from "../../graphql/mutations"
+import { getMeResponseType } from "../../screens"
+import { useNavigation } from '@react-navigation/native';
 
 const sanitize = (str: string) => {
   str = str.replace(/[^a-z0-9áéíóúñü \.,_-]/gim, "")
   return str.trim()
 }
 
+const writeRoomIdToCache = ({ client, roomId }:{client: any, roomId: string}) => {
+  client.writeData({
+    data: {
+      roomId
+    }
+  })
+}
+
 export const JoinRoom = () => {
   const [joinRoomInput, setJoinRoomInput] = useState<string>("")
-  const [joinRoom, { loading: joinRoomLoading, data: joinRoomData, error: joinRoomError }] = useLazyQuery(GET_ROOM)
+  const [joinRoom, { loading: joinRoomLoading, data: joinRoomData, error: joinRoomError }] = useLazyQuery(GET_ROOM, {
+    fetchPolicy: 'no-cache'
+  })
+  const client = useApolloClient()
+  const navigation = useNavigation()
 
   useEffect(() => {
     if (joinRoomData) {
-      // redirect to room page
+      navigation.navigate("VotingRoom", {
+        roomId: joinRoomData.room.id
+      })
+      writeRoomIdToCache({
+        client, 
+        roomId: joinRoomData.room.id
+      })
     }
   }, [joinRoomData])
 
   const joinRoomHandler = (roomId: string) => {
-    roomId = sanitize(roomId)
+    roomId = sanitize(roomId.toLowerCase())
     joinRoom({
       variables: { id: roomId }
     })
@@ -54,10 +74,11 @@ export const JoinRoom = () => {
         <Text style={styles.errorMessage}>{joinRoomError.message}</Text>
       )}
       <View style={styles.buttonContainer}>
-        <Button onClick={() => joinRoomHandler(joinRoomInput)}>
-          <Text style={[textStyles.p, styles.buttonText]}>
-            Join Room
-            </Text>
+        <Button onClick={() => joinRoomHandler(joinRoomInput)} disabled={joinRoomLoading}>
+          {joinRoomLoading ?
+            <ActivityIndicator size="small" color={colors.white} /> :
+            <Text style={[textStyles.p, styles.buttonText]}>Join Room</Text>
+          }
         </Button>
       </View>
     </React.Fragment>
@@ -74,16 +95,32 @@ export const CreateRoom = () => {
     },
     fetchPolicy: "cache-first"
   })
+  const client = useApolloClient()
+  const navigation = useNavigation()
 
+  useEffect(() => {
+    if (token) {
+      withRenew(getMe)
+    }
+  }, [token])
 
-  // useEffect(() => {
-  //   withRenew(getMe)
-  // }, [])
+  useEffect(() => {
+    if (createRoomData?.addRoom?.id) {
+      navigation.navigate('VotingRoom', {
+        roomId: createRoomData.addRoom.id
+      })
+      writeRoomIdToCache({
+        client,
+        roomId: createRoomData?.addRoom?.id
+      })
+    }
+
+  }, [createRoomData])
 
   const createRoomHandler = () => {
-    const roomId = sanitize(createRoomInput)
+    const roomId = sanitize(createRoomInput.toLowerCase())
     createRoom({
-      variables: { roomId, adminId: meData?.me.id }
+      variables: { roomId, admin: meData?.me }
     })
   }
 
@@ -100,9 +137,9 @@ export const CreateRoom = () => {
         <Text style={styles.errorMessage}>{createRoomError.message}</Text>
       )}
       <View style={styles.buttonContainer}>
-        <Button onClick={() => createRoomHandler()}>
+        <Button onClick={() => createRoomHandler()} disabled={createRoomLoading}>
           {createRoomLoading ?
-            <Text>Loading</Text> :
+            <ActivityIndicator size="small" color={colors.white} /> :
             <Text style={[textStyles.p, styles.buttonText]}>Create Room</Text>
           }
         </Button>

@@ -1,14 +1,18 @@
 import React, { useEffect, useContext } from 'react';
 
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-
+import { NavigationContainer, RouteProp } from '@react-navigation/native';
+import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { TransitionSpecs, HeaderStyleInterpolators } from '@react-navigation/stack';
 import Home from "./Home"
+import VotingRoom from "./VotingRoom"
+import ExpandedModal from './ExpandedModal'
+import SearchScreen from './SearchScreen'
 
 import { GET_ME } from "../graphql/queries"
-import { useLazyQuery } from '@apollo/react-hooks'
 import { useApolloClient } from '@apollo/react-hooks'
-import { User } from "../types"
+import { User, Image } from "../types"
+import { TILE_TYPES } from "../components/VotingRoom/MusicTile"
 
 import SpotifyContext from "../spotify/spotifyContext"
 
@@ -16,17 +20,64 @@ export interface getMeResponseType {
   me: User
 }
 
+type RootStackParamList = {
+  Home: undefined;
+  VotingRoom: undefined;
+  ExpandedModal: {
+    primaryLabel: string
+    secondaryLabel: string
+    image: string
+    type: TILE_TYPES
+    album: {
+      images: Image
+    }
+  },
+  SearchScreen: undefined
+};
 
-const Stack = createStackNavigator();
+export type HomeRouteProps = RouteProp<RootStackParamList, 'Home'>;
+export type VotingRoomRouteProps = RouteProp<RootStackParamList, 'VotingRoom'>;
+export type ExpandedModalRouteProps = RouteProp<RootStackParamList, 'ExpandedModal'>;
+
+const AppStack = createStackNavigator<RootStackParamList>();
+const SearchStack = createStackNavigator()
+const VotingRoomStack = createStackNavigator()
+const Tab = createBottomTabNavigator()
+
+const forFade = ({ current, closing }: {current: any, closing: any}) => ({
+  cardStyle: {
+    opacity: current.progress,
+  },
+});
+
+
+const SearchStackScreen = () => (
+  <SearchStack.Navigator screenOptions={{ headerShown: false }}>
+    <SearchStack.Screen name="SearchScreen" component={SearchScreen} />
+    <SearchStack.Screen name="ExpandedModal" component={ExpandedModal} />
+  </SearchStack.Navigator>
+)
+
+const VotingRoomStackScreen = () => (
+  <VotingRoomStack.Navigator screenOptions={{ headerShown: false }}>
+    <VotingRoomStack.Screen name="VotingRoom" component={VotingRoom}/>
+  </VotingRoomStack.Navigator>
+)
+
+const AppTabs = () => (
+  <Tab.Navigator>
+    <Tab.Screen name="VotingRoom" component={VotingRoomStackScreen} />
+    <Tab.Screen name="SearchScreen" component={SearchStackScreen} />
+  </Tab.Navigator>
+)
 
 export default () => {
-  const { withRenew } = useContext(SpotifyContext)
+  const client = useApolloClient()
+  const { token, withRenew } = useContext(SpotifyContext)
   
-
   const getMe = async () => {
-    const client = useApolloClient()
-    const { token } = useContext(SpotifyContext)
-    const data = await client.query({
+    // call the result so future calls can get this from cache
+    await client.query({
       query: GET_ME,
       variables: {
         accessToken: token
@@ -36,19 +87,19 @@ export default () => {
     })
   }
 
+
   useEffect(() => {
-    withRenew(getMe)
-  }, [])
+    if (token) {
+      withRenew(getMe)
+    }
+  }, [token])
 
   return (
-        <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false
-            }}
-          >
-            <Stack.Screen name="Home" component={Home} />
-          </Stack.Navigator>
-        </NavigationContainer>
+    <NavigationContainer>
+      <AppStack.Navigator screenOptions={{ headerShown: false }}>
+        <AppStack.Screen name="Home" component={Home}/ >
+        <AppStack.Screen name="VotingRoom" component={AppTabs} />
+      </AppStack.Navigator>
+    </NavigationContainer>
   );
 };

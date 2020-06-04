@@ -66,8 +66,7 @@ export const GET_ROOM = gql`
   query Room($id: ID!){
     room(id: $id){
       id
-      name
-      adminUser{
+      admin{
         id
       }
     }
@@ -269,6 +268,12 @@ export const GET_TOAST = gql`
     }
   }
 `;
+
+export const GET_ROOM_LOCAL = gql`
+  {
+    roomId @client
+  }
+`
 
 export const GET_BROWSE_INFO = gql`
   {

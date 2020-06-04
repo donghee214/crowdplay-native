@@ -6,14 +6,14 @@ import {
   SafeAreaView
 } from 'react-native'
 
-import RoomTileContainer from "../components/RoomTileContainer"
-import UserIcon from "../components/UserIcon"
+import RoomTileContainer from "../components/Home/RoomTileContainer"
+import UserIcon from "../components/Home/UserIcon"
 
 import { textStyles, fonts } from "../assets/typography"
 import colors from "../assets/colors"
 import { ScrollView } from 'react-native-gesture-handler'
 
-import { JoinRoom, CreateRoom } from "../components/JoinCreateRoom"
+import { JoinRoom, CreateRoom } from "../components/Home/JoinCreateRoom"
 import SpotifyContext from '../spotify/spotifyContext';
 
 const Home = () => {

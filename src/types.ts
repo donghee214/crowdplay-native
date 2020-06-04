@@ -51,7 +51,7 @@ export interface Song {
 }
 
 export interface Room {
-  adminId: string;
+  admin: User;
   name: string;
   id: string;
   currentSong?: Song;
