@@ -4,7 +4,8 @@ import {
   Text,
   ImageBackground,
   TouchableOpacity,
-  StyleSheet
+  StyleSheet,
+  Dimensions
 } from 'react-native'
 import { useApolloClient } from "@apollo/react-hooks";
 import { SpotifySong, Song, Playlist, Album, Artist, Image } from "../../types";
@@ -48,7 +49,6 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
   const navigation = useNavigation()
   const [clicked, setClicked] = useState(false)
   const { data: addedSongIds } = useQuery(GET_ADDED_SONG_IDS)
-
   const [tile, setTile] = useState<TileProps>({
     clickEvent: () => { },
     imageURL: "",
@@ -101,11 +101,11 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
 
   useEffect(() => {
     const getOptimalImage = (arrOfImages: Image[]) => {
-      if (!arrOfImages) return ""
+      if (arrOfImages.length === 0) return ''
       if (large && arrOfImages.length >= 2) {
-        return arrOfImages.slice(-2)[0].url
+        return arrOfImages.slice(-2)[0]?.url
       }
-      return arrOfImages.slice(-1)[0].url
+      return arrOfImages.slice(-1)[0]?.url
     }
     switch (tileType) {
       case (TILE_TYPES.ADDED_TRACK):
@@ -169,12 +169,12 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
         throw ("unrecognized tile type!")
     }
   }, [data, clicked])
-
+  
   return (
     <TouchableOpacity
       onPress={() => tile.clickEvent({ ...tile, clicked })}
       activeOpacity={clicked ? 1 : 0.2}
-      style={clicked ? styles.clickedOpacity : styles.nonClickedOpacity}
+      style={[styles.buttonSize, clicked ? styles.clickedOpacity : styles.nonClickedOpacity]}
     >
       <ImageBackground
         style={styles.musicTileBackground}
@@ -182,10 +182,15 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
       >
 
       </ImageBackground>
+      <Text>
+        test
+      </Text>
     </TouchableOpacity>
 
   )
 };
+
+const musicTileSize = Math.round(Dimensions.get('window').width/3);
 
 const styles = StyleSheet.create({
   clickedOpacity: {
@@ -198,6 +203,10 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
     justifyContent: "center"
+  },
+  buttonSize: {
+    width: musicTileSize,
+    height: musicTileSize
   }
 })
 
