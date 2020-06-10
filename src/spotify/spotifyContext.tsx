@@ -149,6 +149,7 @@ const SpotifyContextProvider: React.FC = props => {
                 })
             })
             const refreshedSession = await response.json()
+            console.log('refreshed session:', refreshedSession)
             setToken(refreshedSession.access_token)
             saveTokenLocally(refreshedSession)
         }

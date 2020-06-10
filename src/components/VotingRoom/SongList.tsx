@@ -4,11 +4,13 @@ import firestore from '@react-native-firebase/firestore';
 import { useQuery } from '@apollo/react-hooks'
 import { GET_ROOM_LOCAL } from "../../graphql/queries"
 import { Song } from '../../types'
+import { useApolloClient } from "@apollo/react-hooks";
 
 
 const SongList: React.FC<{}> = () => {
   const [songs, setSongs] = useState<Song[]>([])
   const [loading, setLoading] = useState<boolean>()
+  const client = useApolloClient()
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
 
   const addSongs = (newSongs: Song[]) => {
@@ -54,9 +56,17 @@ const SongList: React.FC<{}> = () => {
     return () => unsub()
   }, [])
 
+  useEffect(() => {
+    client.writeData({
+      data: {
+        songs: songs.map((song: Song) => song.trackId)
+      }
+    })
+  }, [songs])
+
   return (
     <View>
-      
+
     </View>
   )
 }

@@ -12,18 +12,16 @@ import {
 import usePrevious from '../hooks/usePrevious'
 import { useQuery } from '@apollo/react-hooks'
 import { GET_ROOM_LOCAL } from "../graphql/queries"
-import { textStyles, VotingRoomText, fonts } from '../assets/typography'
-import withLifecycleAnimation from '../HOCs/WithLifecycleAnimation'
-import SearchResults from '../components/Search/SearchResults'
-import SongRecs from '../components/Search/SongRecs'
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-import colors from '../assets/colors'
+import { textStyles, VotingRoomText, fonts, sizes } from '../assets/typography'
 
-const SongRecsWithAnimation = withLifecycleAnimation(SongRecs)
-const SearchResultsWithAnimation = withLifecycleAnimation(SearchResults)
+import SearchResults from '../components/Search/SearchResults'
+import { TabView, TabBar } from 'react-native-tab-view';
+import { TILE_TYPES } from '../components/VotingRoom/MusicTile'
+import colors from '../assets/colors'
 
 const TAB_BAR_HEIGHT = 48;
 const HEADER_HEIGHT = 150;
+const HEADER_VISIBLE = 60;
 
 const initialLayout = { width: Dimensions.get('window').width };
 
@@ -32,22 +30,32 @@ const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const scrollY: any = useRef(new Animated.Value(0)).current
 
-  // const [isSongRecsAnimating, setIsSongRecsAnimating] = useState<boolean>(false)
-  // const [isSearchResultsAnimating, setIsSearchResultsAnimating] = useState<boolean>(false)
-  // const [showRecs, setShowRecs] = useState<boolean>(true)
-
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    { key: 'first', title: 'First' },
-    { key: 'second', title: 'Second' },
+    { key: 'Songs', title: 'Songs' },
+    { key: 'Artists', title: 'Artists' },
+    { key: 'Playlists', title: 'Playlists' },
+    { key: 'Albums', title: 'Albums' },
   ]);
 
   let listRefArr: any = useRef([]);
   let listOffset: any = useRef({});
 
   const renderScene = ({ route }: { route: any }) => {
+    const refHandler = (ref: any) => {
+      if (ref) {
+        const found = listRefArr.current.find((e: any) => e.key === route.key);
+        if (!found) {
+          listRefArr.current.push({
+            key: route.key,
+            value: ref,
+          });
+        }
+      }
+    }
+
     switch (route.key) {
-      case 'first':
+      case 'Songs':
         return <SearchResults
           searchQuery={searchQuery}
           scrollY={scrollY}
@@ -55,19 +63,10 @@ const SearchScreen = () => {
           TAB_BAR_HEIGHT={TAB_BAR_HEIGHT}
           onMomentumScrollEnd={onMomentumScrollEnd}
           onScrollEndDrag={onScrollEndDrag}
-          onGetRef={(ref) => {
-            if (ref) {
-              const found = listRefArr.current.find((e: any) => e.key === route.key);
-              if (!found) {
-                listRefArr.current.push({
-                  key: route.key,
-                  value: ref,
-                });
-              }
-            }
-          }}
+          type={TILE_TYPES.TRACK}
+          onGetRef={refHandler}
         />;
-      case 'second':
+      case 'Artists':
         return <SearchResults
           searchQuery={searchQuery}
           scrollY={scrollY}
@@ -75,17 +74,30 @@ const SearchScreen = () => {
           TAB_BAR_HEIGHT={TAB_BAR_HEIGHT}
           onMomentumScrollEnd={onMomentumScrollEnd}
           onScrollEndDrag={onScrollEndDrag}
-          onGetRef={(ref) => {
-            if (ref) {
-              const found = listRefArr.current.find((e: any) => e.key === route.key);
-              if (!found) {
-                listRefArr.current.push({
-                  key: route.key,
-                  value: ref,
-                });
-              }
-            }
-          }}
+          type={TILE_TYPES.ARTIST}
+          onGetRef={refHandler}
+        />;
+      case 'Playlists':
+        return <SearchResults
+          searchQuery={searchQuery}
+          scrollY={scrollY}
+          HEADER_HEIGHT={HEADER_HEIGHT}
+          TAB_BAR_HEIGHT={TAB_BAR_HEIGHT}
+          onMomentumScrollEnd={onMomentumScrollEnd}
+          onScrollEndDrag={onScrollEndDrag}
+          type={TILE_TYPES.PLAYLIST}
+          onGetRef={refHandler}
+        />;
+      case 'Albums':
+        return <SearchResults
+          searchQuery={searchQuery}
+          scrollY={scrollY}
+          HEADER_HEIGHT={HEADER_HEIGHT}
+          TAB_BAR_HEIGHT={TAB_BAR_HEIGHT}
+          onMomentumScrollEnd={onMomentumScrollEnd}
+          onScrollEndDrag={onScrollEndDrag}
+          type={TILE_TYPES.ALBUM}
+          onGetRef={refHandler}
         />;
       default:
         return null;
@@ -131,7 +143,7 @@ const SearchScreen = () => {
   }
 
   useEffect(() => {
-    scrollY.addListener(({ value }: { value: any}) => {
+    scrollY.addListener(({ value }: { value: any }) => {
       const curRoute = routes[index].key;
       listOffset.current[curRoute] = value;
     });
@@ -140,43 +152,10 @@ const SearchScreen = () => {
     };
   }, [routes, index]);
 
-  // const renderHeader = () => {
-  //   const y = scrollY.interpolate({
-  //     inputRange: [0, HeaderHeight],
-  //     outputRange: [0, -HeaderHeight],
-  //     extrapolateRight: 'clamp',
-  //   });
-  //   return (
-  //     <Animated.View style={[styles.header,
-  //     { transform: [{ translateY: y }] }]}>
-  //       // just a simple header
-  //       <Text>{'Header'}</Text>
-  //     </Animated.View>
-  //   );
-  // };
-
-  // const focusHandler = (focus: boolean) => {
-  //   if (!focus && !searchQuery) {
-  //     setShowRecs(true)
-  //   }
-  //   else {
-  //     setShowRecs(false)
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (showRecs) {
-  //     setIsSongRecsAnimating(true)
-  //   }
-  //   else {
-  //     setIsSearchResultsAnimating(true)
-  //   }
-  // }, [showRecs])
-
   const renderTabBar = (props: any) => {
     const y = scrollY.interpolate({
-      inputRange: [0, HEADER_HEIGHT],
-      outputRange: [HEADER_HEIGHT, 0],
+      inputRange: [0, HEADER_HEIGHT - HEADER_VISIBLE],
+      outputRange: [HEADER_HEIGHT, HEADER_VISIBLE],
       extrapolateRight: 'clamp',
     });
     return (
@@ -188,7 +167,21 @@ const SearchScreen = () => {
           transform: [{ translateY: y }],
           width: '100%',
         }}>
-        <TabBar {...props} />
+        <TabBar
+          {...props}
+          indicatorStyle={{ backgroundColor: colors.green }}
+          style={{ backgroundColor: colors.whiteSmoke }}
+          renderLabel={({ route, focused, color }) => (
+            <Text style={[
+              textStyles.h3,
+              {
+                color: focused ? colors.green : colors.lightBlack,
+                fontSize: sizes.xs
+              }]}>
+              {route.title}
+            </Text>
+          )}
+        />
       </Animated.View>
     );
   };
@@ -205,8 +198,8 @@ const SearchScreen = () => {
 
   const renderHeader = () => {
     const y = scrollY.interpolate({
-      inputRange: [0, HEADER_HEIGHT],
-      outputRange: [0, -HEADER_HEIGHT],
+      inputRange: [0, HEADER_HEIGHT - HEADER_VISIBLE],
+      outputRange: [0, -HEADER_HEIGHT + HEADER_VISIBLE],
       extrapolateRight: 'clamp',
     });
 
@@ -240,35 +233,6 @@ const SearchScreen = () => {
       <View style={{ flex: 1 }}>
         {renderTabView()}
         {renderHeader()}
-        {/* <ScrollView>
-        <View>
-          <View style={styles.topHeader}>
-            <Text style={[textStyles.h1, VotingRoomText.header]}>
-              Search
-                </Text>
-            <Text style={[textStyles.p, VotingRoomText.description]}>
-              Search for songs, artists, albums, or playlists
-                </Text>
-          </View>
-          <TextInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocus={() => focusHandler(true)}
-            onBlur={() => focusHandler(false)}
-          />
-        </View>
-        <SongRecsWithAnimation
-          animationDuration={150}
-          isMounted={(showRecs && !isSearchResultsAnimating)}
-          animationFinishedCallback={() => setIsSongRecsAnimating(false)}
-        />
-        <SearchResultsWithAnimation
-          animationDuration={150}
-          isMounted={(!showRecs && !isSongRecsAnimating)}
-          animationFinishedCallback={() => setIsSearchResultsAnimating(false)}
-          searchQuery={searchQuery}
-        />
-      </ScrollView> */}
       </View>
     </SafeAreaView>
 
@@ -295,11 +259,10 @@ const styles = StyleSheet.create({
     height: HEADER_HEIGHT,
     width: '100%',
     justifyContent: 'flex-end',
-    backgroundColor: 'red',
     alignItems: 'flex-start',
+    backgroundColor: colors.whiteSmoke,
     position: 'absolute',
     paddingHorizontal: 20,
-    paddingVertical: 10,
   },
 })
 

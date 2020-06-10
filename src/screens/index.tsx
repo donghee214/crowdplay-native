@@ -24,9 +24,12 @@ type RootStackParamList = {
   Home: undefined;
   VotingRoom: undefined;
   ExpandedModal: {
+    roomId: string
+    id: string
     primaryLabel: string
     secondaryLabel: string
     image: string
+    href: string
     type: TILE_TYPES
     album: {
       images: Image

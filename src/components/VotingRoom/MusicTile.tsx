@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Animated,
   ImageBackground,
   TouchableOpacity,
   StyleSheet,
@@ -15,6 +16,9 @@ import { getUniqueId } from 'react-native-device-info';
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { GET_ADDED_SONG_IDS } from "../../graphql/queries"
+import { color } from "react-native-reanimated";
+import colors from "../../assets/colors";
+import { textStyles } from "../../assets/typography";
 
 export enum TILE_TYPES {
   TRACK = "track",
@@ -47,10 +51,12 @@ interface TileProps {
 //TODO: REFACTOR INTO A CONTAINER COMPONENT, ONE FOR RECS THE OTHER FOR ADDED SONGS
 const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: Props) => {
   const navigation = useNavigation()
+  const fadeAnim = new Animated.Value(0)
   const [clicked, setClicked] = useState(false)
   const { data: addedSongIds } = useQuery(GET_ADDED_SONG_IDS)
+
   const [tile, setTile] = useState<TileProps>({
-    clickEvent: () => { },
+    clickEvent: () => {},
     imageURL: "",
     body: 0,
     mainText: "",
@@ -80,12 +86,22 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
     // expand modal to songs in the playlist, artist, or album
     navigation.navigate("ExpandedModal", {
       roomId,
+      href: data.href,
+      id: data.id,
       primaryLabel: mainText,
       secondaryLabel: subText,
       image: imageURL,
       type,
       album: type === TILE_TYPES.ALBUM ? data : { images: { height: null, width: null, url: null } }
     })
+  }
+
+  const animateRender = () => {
+    Animated.timing(fadeAnim, {
+      useNativeDriver: true,
+      toValue: 1,
+      duration: 250
+    }).start();
   }
 
   useEffect(() => {
@@ -102,7 +118,7 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
   useEffect(() => {
     const getOptimalImage = (arrOfImages: Image[]) => {
       if (arrOfImages.length === 0) return ''
-      if (large && arrOfImages.length >= 2) {
+      if (arrOfImages.length >= 2) {
         return arrOfImages.slice(-2)[0]?.url
       }
       return arrOfImages.slice(-1)[0]?.url
@@ -169,30 +185,52 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
         throw ("unrecognized tile type!")
     }
   }, [data, clicked])
-  
+
   return (
-    <TouchableOpacity
-      onPress={() => tile.clickEvent({ ...tile, clicked })}
-      activeOpacity={clicked ? 1 : 0.2}
-      style={[styles.buttonSize, clicked ? styles.clickedOpacity : styles.nonClickedOpacity]}
-    >
-      <ImageBackground
-        style={styles.musicTileBackground}
-        source={{ uri: tile.imageURL }}
+    <Animated.View style={{ opacity: fadeAnim }}>
+      <TouchableOpacity
+        onPress={() => tile.clickEvent({ ...tile, clicked })}
+        activeOpacity={clicked ? 1 : 0.2}
+        style={[
+          clicked ? styles.clickedOpacity : styles.nonClickedOpacity,
+          tileType === TILE_TYPES.TRACK ? styles.buttonSizeSmall : styles.buttonSizeMed,
+          styles.button,
+        ]}
       >
-
-      </ImageBackground>
-      <Text>
-        test
-      </Text>
-    </TouchableOpacity>
-
+        <ImageBackground
+          source={{ uri: tile.imageURL }}
+          style={styles.musicTileBackground}
+          onLoad={animateRender}
+        >
+          <View style={styles.textContainer}>
+            <Text style={[textStyles.h2, styles.bodyText]}>
+              {tile.body ? tile.body : ' '}
+            </Text>
+            <Text style={[textStyles.p, styles.mainText]} numberOfLines={1}>
+              {tile.mainText}
+            </Text>
+            <Text style={[textStyles.p, styles.subText]} numberOfLines={1}>
+              {tile.subText}
+            </Text>
+          </View>
+        </ImageBackground>
+      </TouchableOpacity>
+    </Animated.View>
   )
 };
 
-const musicTileSize = Math.round(Dimensions.get('window').width/3);
+const SPACING_MARGIN = 2.5
+
+const musicTileSizeSmall = Math.round(Dimensions.get('window').width / 3) - SPACING_MARGIN * 2;
+const musicTileSizeMed = Math.round(Dimensions.get('window').width / 2) - SPACING_MARGIN * 2;
 
 const styles = StyleSheet.create({
+  hidden: {
+    opacity: 0
+  },
+  visible: {
+    opacity: 1
+  },
   clickedOpacity: {
     opacity: 0.2
   },
@@ -201,12 +239,55 @@ const styles = StyleSheet.create({
   },
   musicTileBackground: {
     flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     resizeMode: "cover",
-    justifyContent: "center"
+    backgroundColor: 'rgba(0,0,0,0.5)'
   },
-  buttonSize: {
-    width: musicTileSize,
-    height: musicTileSize
+  button: {
+    borderRadius: 15,
+    overflow: "hidden",
+    margin: SPACING_MARGIN
+  },
+  buttonSizeSmall: {
+    width: musicTileSizeSmall,
+    height: musicTileSizeSmall
+  },
+  buttonSizeMed: {
+    width: musicTileSizeMed,
+    height: musicTileSizeMed
+  },
+  bodyText: {
+    color: colors.green,
+    zIndex: 1,
+    marginBottom: 5
+  },
+  textContainer: {
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    flex: 1,
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    paddingBottom: 12.5,
+    paddingHorizontal: 7.5
+  },
+  mainText: {
+    textAlign: 'center',
+    color: colors.white,
+    zIndex: 1,
+    // whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    margin: 0,
+    padding: 0,
+    // textOverflow: 'ellipsis'
+  },
+  subText: {
+    textAlign: 'center',
+    color: colors.offWhite,
+    overflow: 'hidden',
+    margin: 0,
+    padding: 0,
   }
 })
 

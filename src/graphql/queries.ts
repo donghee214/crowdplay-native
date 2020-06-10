@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
 export const GET_SEARCH = gql`
-  query Search($query: String!, $limit: Int, $offset: Int){
-    search(q: $query, limit: $limit, offset: $offset){
+  query Search($query: String!, $limit: Int, $offset: Int, $type: [String]){
+    search(q: $query, limit: $limit, offset: $offset, type: $type){
       artists{
         id
         name

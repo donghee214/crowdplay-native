@@ -3,14 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  Animated
+  Animated,
+  ActivityIndicator
 } from 'react-native'
 import { GET_SEARCH } from "../../graphql/queries"
 import { useLazyQuery } from '@apollo/react-hooks'
 import { VotingRoomText, textStyles } from '../../assets/typography'
 import MusicTile, { TILE_TYPES } from '../VotingRoom/MusicTile'
 import { SpotifySong, Artist, Album, Playlist } from '../../types'
-import SpotifyAuth from 'react-native-spotify-remote/dist/SpotifyAuth'
 
 interface dataProps {
   search: {
@@ -26,15 +26,12 @@ interface SearchResultsProps {
   scrollY: any
   HEADER_HEIGHT: number
   TAB_BAR_HEIGHT: number
+  type: TILE_TYPES.ARTIST | TILE_TYPES.ALBUM | TILE_TYPES.TRACK | TILE_TYPES.PLAYLIST
   onMomentumScrollEnd: () => void
   onScrollEndDrag: () => void
   onGetRef: (ref: any) => void
 }
 
-const getSumOfSongs = (data: dataProps) => {
-  if (!data) return 0
-  return data.search.albums.length + data.search.artists.length + data.search.playlists.length + data.search.tracks.length
-}
 
 const SearchResults: React.FC<SearchResultsProps> = ({
   searchQuery,
@@ -43,56 +40,84 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   TAB_BAR_HEIGHT,
   onMomentumScrollEnd,
   onScrollEndDrag,
+  type,
   onGetRef
 }) => {
   const [getSearch, { data: getSearchData, loading: getSearchLoading, error: getSearchError }] = useLazyQuery<dataProps>(GET_SEARCH, {
     fetchPolicy: 'no-cache'
   })
 
-  // const scrollY = useRef(new Animated.Value(0)).current;
+  const getData = () => {
+    switch (type) {
+      case TILE_TYPES.TRACK:
+        return getSearchData?.search?.tracks || []
+      case TILE_TYPES.ALBUM:
+        return getSearchData?.search?.albums || []
+      case TILE_TYPES.ARTIST:
+        return getSearchData?.search?.artists || []
+      case TILE_TYPES.PLAYLIST:
+        return getSearchData?.search?.playlists || []
+
+      default:
+        return []
+    }
+  }
 
   useEffect(() => {
+    const typeMatching = {
+      [TILE_TYPES.TRACK]: ['track'],
+      [TILE_TYPES.ARTIST]: ['artist'],
+      [TILE_TYPES.PLAYLIST]: ['playlist'],
+      [TILE_TYPES.ALBUM]: ['album']
+    }
     if (searchQuery) {
       getSearch({
         variables: {
           query: searchQuery,
-          limit: 25
+          limit: 40,
+          type: typeMatching[type]
         }
       })
     }
   }, [searchQuery])
 
   return (
-    <Animated.FlatList
-      contentContainerStyle={{
-        paddingTop: HEADER_HEIGHT + TAB_BAR_HEIGHT,
-      }}
-      onMomentumScrollEnd={onMomentumScrollEnd}
-      onScrollEndDrag={onScrollEndDrag}
-      style={styles.tileContainers}
-      data={getSearchData?.search?.tracks || []}
-      ref={onGetRef}
-      onScroll={Animated.event(
-        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-        { useNativeDriver: true },
-      )}
-      renderItem={({ item }: { item: SpotifySong }) => (
-        <MusicTile data={item} tileType={TILE_TYPES.TRACK} key={item.id} />
-      )}
-    />
+    <React.Fragment>
+      { getSearchLoading && <ActivityIndicator style={styles.loading} />}
+      <Animated.FlatList
+        contentContainerStyle={{
+          paddingTop: HEADER_HEIGHT + TAB_BAR_HEIGHT,
+        }}
+        onMomentumScrollEnd={onMomentumScrollEnd}
+        onScrollEndDrag={onScrollEndDrag}
+        data={getData()}
+        numColumns={type === TILE_TYPES.TRACK ? 3 : 2}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true },
+        )}
+        ref={onGetRef}
+        renderItem={({ item }: { item: SpotifySong }) => (
+          <MusicTile
+            data={item}
+            tileType={type}
+            key={item.id}
+          />
+        )}
+      />
+    </React.Fragment>
+
   )
 }
 
 const styles = StyleSheet.create({
-  header: {
+  loading: {
     display: 'flex',
-    paddingHorizontal: 22.5,
-    paddingVertical: 27.5
-  },
-  tileContainers: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap'
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 350,
+    width: '100%'
   }
 })
 

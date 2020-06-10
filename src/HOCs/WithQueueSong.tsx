@@ -6,6 +6,7 @@ import { useApolloClient } from "@apollo/react-hooks";
 import firestore from '@react-native-firebase/firestore'
 
 const WithQueueSong = (Component: any) => (props: any) => {
+    // adding song directly thru firebase
     const [addSong, { data: addSongData, error: addSongDataError }] = useMutation(ADD_SONG)
     const client = useApolloClient();
 

@@ -3,7 +3,7 @@ import { Animated } from 'react-native';
 
 // TODO: FIGURE OUT HOW TO ALL HOC TO ACCEPT ANY PROP JUST NEED TO HAVE A COUPLE OF MANDATORY ONES 
 
-interface Props{
+interface Props {
   isMounted: boolean
   animationDuration: number
   animationFinishedCallback?: () => void
@@ -12,7 +12,7 @@ interface Props{
 
 export default (Component: any) => {
   const ComponentWithAnimation = WithAnimation(Component)
-  return class extends React.Component<Props> {
+  return class extends React.Component<Props | any> {
     state = {
       shouldRender: this.props.isMounted
     };
@@ -23,12 +23,15 @@ export default (Component: any) => {
 
     componentDidUpdate(prevProps: any) {
       if (!prevProps.isMounted && this.props.isMounted) {
-          this.setState({ shouldRender: true })
+        this.setState({ shouldRender: true })
       }
     }
 
     render() {
-      return this.state.shouldRender ? <ComponentWithAnimation {...this.props} isMounted={this.props.isMounted} unmountDone={this.unmountDone} /> : null;
+      return this.state.shouldRender ? <ComponentWithAnimation
+        {...this.props}
+        animationDuration={this.props.animationDuration}
+        isMounted={this.props.isMounted} unmountDone={this.unmountDone} /> : null;
     }
   };
 }
