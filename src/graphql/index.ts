@@ -1,12 +1,15 @@
 import ApolloClient from 'apollo-boost';
 import { InMemoryCache } from 'apollo-boost';
+import { BACKEND_URL } from 'react-native-dotenv'
+
+
 
 const cache = new InMemoryCache({
   addTypename: false
 })
 
 const client = new ApolloClient({
-  uri: 'http://192.168.0.12:4000/graphql',
+  uri: `${BACKEND_URL}/graphql`,
   onError: ({ operation, response, graphQLErrors, networkError, forward}) => {
     // console.log(response)
     // console.log(graphQLErrors)

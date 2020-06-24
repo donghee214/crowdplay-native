@@ -7,7 +7,6 @@ interface Props {
   isMounted: boolean
   animationDuration: number
   animationFinishedCallback?: () => void
-  searchQuery?: string
 }
 
 export default (Component: any) => {
@@ -36,41 +35,79 @@ export default (Component: any) => {
   };
 }
 
+// const fadeInOpacity = (value, duration) => (
+//   Animated.timing(value, {
+//     useNativeDriver: true,
+//     toValue: 1,
+//     duration: duration,
+//   }).start();
+// )
+
 interface WithAnimationProps {
   isMounted: boolean
   animationDuration: number
   unmountDone: () => void
-  animationFinishedCallback?: () => void
+  animationFinishedCallback?: () => void,
+  fade?: boolean,
+  translate?: boolean
 }
 
 const WithAnimation = (Component: any) => {
   return class extends React.Component<WithAnimationProps> {
     fadeAnim = new Animated.Value(0)
+    translateAnim = new Animated.Value(0)
 
     componentDidMount() {
-      Animated.timing(this.fadeAnim, {
-        useNativeDriver: true,
-        toValue: 1,
-        duration: this.props.animationDuration,
-      }).start();
+      const animations = []
+      if (this.props.fade) {
+        animations.push(Animated.timing(this.fadeAnim, {
+          useNativeDriver: true,
+          toValue: 1,
+          duration: this.props.animationDuration,
+        }))
+      }
+      if (this.props.translate) {
+        animations.push(Animated.timing(this.translateAnim, {
+          useNativeDriver: true,
+          toValue: -100,
+          duration: this.props.animationDuration,
+        }))
+      }
+      Animated.parallel(animations).start()
     }
 
     componentDidUpdate() {
       if (!this.props.isMounted) {
-        Animated.timing(this.fadeAnim, {
-          useNativeDriver: true,
-          toValue: 0,
-          duration: this.props.animationDuration,
-        }).start(() => {
+        const animations = []
+        if (this.props.fade) {
+          animations.push(Animated.timing(this.fadeAnim, {
+            useNativeDriver: true,
+            toValue: 0,
+            duration: this.props.animationDuration,
+          }))
+        }
+        if (this.props.translate) {
+          animations.push(Animated.timing(this.translateAnim, {
+            useNativeDriver: true,
+            toValue: 50,
+            duration: this.props.animationDuration,
+          }))
+        }
+        Animated.parallel(animations).start(() => {
           this.props.unmountDone()
           this.props.animationFinishedCallback && this.props.animationFinishedCallback()
-        });
+        })
       }
     }
 
     render() {
       return (
-        <Animated.View style={{ opacity: this.fadeAnim }}>
+        <Animated.View style={{
+          opacity: this.fadeAnim,
+          transform: [
+            { translateY: this.translateAnim }
+          ]
+        }}>
           <Component {...this.props} />
         </Animated.View>
       )

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   StyleSheet,
-  Dimensions
+  Dimensions,
 } from 'react-native'
 import { useApolloClient } from "@apollo/react-hooks";
 import { SpotifySong, Song, Playlist, Album, Artist, Image } from "../../types";
@@ -47,6 +47,7 @@ interface TileProps {
   type: TILE_TYPES;
 }
 
+const DEFAULT_BACKGROUND_SOURCE_IMAGE = 'https://tr.rbxcdn.com/722e50adb353073b1e7c665e89d3423b/420/420/Decal/Png'
 
 //TODO: REFACTOR INTO A CONTAINER COMPONENT, ONE FOR RECS THE OTHER FOR ADDED SONGS
 const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: Props) => {
@@ -57,7 +58,7 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
 
   const [tile, setTile] = useState<TileProps>({
     clickEvent: () => {},
-    imageURL: "",
+    imageURL: DEFAULT_BACKGROUND_SOURCE_IMAGE,
     body: 0,
     mainText: "",
     subText: "",
@@ -117,7 +118,7 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
 
   useEffect(() => {
     const getOptimalImage = (arrOfImages: Image[]) => {
-      if (arrOfImages.length === 0) return ''
+      if (arrOfImages.length === 0) return DEFAULT_BACKGROUND_SOURCE_IMAGE
       if (arrOfImages.length >= 2) {
         return arrOfImages.slice(-2)[0]?.url
       }
@@ -140,7 +141,7 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
       case (TILE_TYPES.TRACK):
         data = data as SpotifySong
         setTile({
-          clickEvent: () => queueSong(data),
+          clickEvent: ({ clicked }: { clicked: boolean }) => queueSong(data, roomId, clicked),
           body: undefined,
           mainText: data.name,
           subText: data.artists[0].name,
@@ -190,11 +191,11 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
     <Animated.View style={{ opacity: fadeAnim }}>
       <TouchableOpacity
         onPress={() => tile.clickEvent({ ...tile, clicked })}
-        activeOpacity={clicked ? 1 : 0.2}
+        disabled={!TILE_TYPES.ADDED_TRACK && clicked}
         style={[
-          clicked ? styles.clickedOpacity : styles.nonClickedOpacity,
-          tileType === TILE_TYPES.TRACK ? styles.buttonSizeSmall : styles.buttonSizeMed,
+          (tileType === TILE_TYPES.TRACK || tileType === TILE_TYPES.ADDED_TRACK) ? styles.buttonSizeSmall : styles.buttonSizeMed,
           styles.button,
+          clicked ? styles.clickedOpacity : styles.nonClickedOpacity,
         ]}
       >
         <ImageBackground
@@ -261,7 +262,9 @@ const styles = StyleSheet.create({
   bodyText: {
     color: colors.green,
     zIndex: 1,
-    marginBottom: 5
+    marginBottom: 8,
+    fontSize: 26,
+    textAlign: 'center'
   },
   textContainer: {
     backgroundColor: 'rgba(0,0,0,0.35)',

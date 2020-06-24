@@ -8,6 +8,7 @@ import Home from "./Home"
 import VotingRoom from "./VotingRoom"
 import ExpandedModal from './ExpandedModal'
 import SearchScreen from './SearchScreen'
+import withToast from '../HOCs/WithToast'
 
 import { GET_ME } from "../graphql/queries"
 import { useApolloClient } from '@apollo/react-hooks'
@@ -74,7 +75,7 @@ const AppTabs = () => (
   </Tab.Navigator>
 )
 
-export default () => {
+const Screens = () => {
   const client = useApolloClient()
   const { token, withRenew } = useContext(SpotifyContext)
   
@@ -100,9 +101,11 @@ export default () => {
   return (
     <NavigationContainer>
       <AppStack.Navigator screenOptions={{ headerShown: false }}>
-        <AppStack.Screen name="Home" component={Home}/ >
+        <AppStack.Screen name="Home" component={Home} />
         <AppStack.Screen name="VotingRoom" component={AppTabs} />
       </AppStack.Navigator>
     </NavigationContainer>
   );
 };
+
+export default withToast(Screens)

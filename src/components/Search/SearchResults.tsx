@@ -6,8 +6,8 @@ import {
   Animated,
   ActivityIndicator
 } from 'react-native'
-import { GET_SEARCH } from "../../graphql/queries"
-import { useLazyQuery } from '@apollo/react-hooks'
+import { GET_SEARCH, GET_ROOM_LOCAL } from "../../graphql/queries"
+import { useLazyQuery, useQuery } from '@apollo/react-hooks'
 import { VotingRoomText, textStyles } from '../../assets/typography'
 import MusicTile, { TILE_TYPES } from '../VotingRoom/MusicTile'
 import { SpotifySong, Artist, Album, Playlist } from '../../types'
@@ -46,6 +46,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const [getSearch, { data: getSearchData, loading: getSearchLoading, error: getSearchError }] = useLazyQuery<dataProps>(GET_SEARCH, {
     fetchPolicy: 'no-cache'
   })
+  const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
 
   const getData = () => {
     switch (type) {
@@ -97,9 +98,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           { useNativeDriver: true },
         )}
         ref={onGetRef}
+        keyExtractor={( item: SpotifySong ) => item.id }
         renderItem={({ item }: { item: SpotifySong }) => (
           <MusicTile
             data={item}
+            roomId={dataRoomId.roomId}
             tileType={type}
             key={item.id}
           />

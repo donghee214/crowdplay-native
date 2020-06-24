@@ -10,12 +10,14 @@ const WithQueueSong = (Component: any) => (props: any) => {
     const [addSong, { data: addSongData, error: addSongDataError }] = useMutation(ADD_SONG)
     const client = useApolloClient();
 
+
+
     const queueSong = (data: SpotifySong, roomId: string, clicked: boolean) => {
         if (clicked) {
             client.writeData({
                 data: {
                     toast: {
-                        id: props.data.id + "_already_added",
+                        id: data.id + "_already_added",
                         message: "Song already in queue"
                     }
                 }
@@ -23,19 +25,19 @@ const WithQueueSong = (Component: any) => (props: any) => {
         }
         else {
             const songRef = firestore().collection(`rooms/${roomId}/songs`).doc(data.id)
+            client.writeData({
+                data: {
+                    toast: {
+                        id: data.id,
+                        message: "Song added"
+                    }
+                }
+            })
             songRef.set({
                 trackId: data.id,
                 score: 1,
                 voters: [],
                 song: data
-            })
-            client.writeData({
-                data: {
-                    toast: {
-                        id: props.data.id,
-                        message: "Song added"
-                    }
-                }
             })
         }
     }

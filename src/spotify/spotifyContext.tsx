@@ -39,11 +39,12 @@ export interface SessionProps {
     refreshToken?: string;
 }
 
-import { CLIENT_ID, REDIRECT_URL, TOKEN_REFRESH_URL } from 'react-native-dotenv'
+import { CLIENT_ID, REDIRECT_URL, BACKEND_URL } from 'react-native-dotenv'
 
-const SPOTIFY_SERVER = TOKEN_REFRESH_URL
+const SPOTIFY_SERVER = BACKEND_URL
 
 export const config: ApiConfig = {
+    playURI: '',
     clientID: CLIENT_ID,
     showDialog: true,
     redirectURL: REDIRECT_URL,
@@ -86,7 +87,6 @@ const SpotifyContextProvider: React.FC = props => {
             setToken(accessToken)
             if(!accessToken && session?.refreshToken){
                 await renewSession()
-                setToken(accessToken)
             }
         })()
         return () => {
@@ -135,7 +135,7 @@ const SpotifyContextProvider: React.FC = props => {
     }
 
     const renewSession = async () => {
-        console.log('renewing session...')
+        console.log('renew called')
         const { refreshToken } = await getLocalSession()
         if (refreshToken) {
             const response = await fetch(`${SPOTIFY_SERVER}/refresh`, {
@@ -148,6 +148,7 @@ const SpotifyContextProvider: React.FC = props => {
                     refresh_token: refreshToken
                 })
             })
+            console.log(response)
             const refreshedSession = await response.json()
             console.log('refreshed session:', refreshedSession)
             setToken(refreshedSession.access_token)
@@ -206,7 +207,8 @@ const SpotifyContextProvider: React.FC = props => {
     const connectRemote = async () => {
         if (token) {
             try {
-                await remote.connect(token);
+                await remote.connect(token);  
+                await remote.playUri('spotify:track:6BczmOSGhFtWRzQzuREBx9')              
             }
             catch (err) {
                 await renewSession()

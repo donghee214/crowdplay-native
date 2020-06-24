@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react"
-import { View, StyleSheet } from "react-native"
+import {
+  View,
+  StyleSheet,
+  Text,
+  Dimensions,
+  FlatList
+} from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import { useQuery } from '@apollo/react-hooks'
 import { GET_ROOM_LOCAL } from "../../graphql/queries"
 import { Song } from '../../types'
 import { useApolloClient } from "@apollo/react-hooks";
-
+import MusicTile, { TILE_TYPES } from './MusicTile'
+import { textStyles, VotingRoomText } from '../../assets/typography'
+import colors from '../../assets/colors'
 
 const SongList: React.FC<{}> = () => {
   const [songs, setSongs] = useState<Song[]>([])
@@ -65,10 +73,69 @@ const SongList: React.FC<{}> = () => {
   }, [songs])
 
   return (
-    <View>
+    <FlatList
+      data={songs}
+      bounces={false}
+      style={styles.mainContentContainer}
+      ListHeaderComponent={
+        <View style={styles.topHeader}>
+          <Text style={[textStyles.h1, VotingRoomText.header]}>
+            Up Next
+        </Text>
+          <Text style={[textStyles.p, VotingRoomText.description]}>
+            Tap to upvote
+        </Text>
+        </View>
+      }
+      numColumns={3}
+      renderItem={({ item }: { item: Song }) => (
+        <MusicTile
+          key={item.trackId}
+          data={item.song}
+          score={item.score}
+          roomId={dataRoomId.roomId}
+          voters={item.voters}
+          tileType={TILE_TYPES.ADDED_TRACK}
+        />
+      )}
+    />
+    // <View style={styles.songContainer}>
+    //   {songs ?
+    //     songs.map((song: Song) =>
+    //       <MusicTile
+    //         key={song.trackId}
+    //         data={song.song}
+    //         score={song.score}
+    //         roomId={dataRoomId.roomId}
+    //         voters={song.voters}
+    //         tileType={TILE_TYPES.ADDED_TRACK}
+    //       />) : 
+    //       <View>
+    //         <Text>
+    //           No songs added yet
+    //         </Text>
+    //         <Text>
 
-    </View>
+    //         </Text>
+    //       </View>
+    //     }
+    // </View>
   )
 }
+
+const styles = StyleSheet.create({
+  mainContentContainer: {
+    backgroundColor: colors.whiteSmoke,
+    borderRadius: 35,
+    height: 2000,
+    width: Dimensions.get('window').width,
+    zIndex: 2
+  },
+  topHeader: {
+    display: 'flex',
+    paddingHorizontal: 22.5,
+    paddingVertical: 27.5
+  }
+})
 
 export default SongList

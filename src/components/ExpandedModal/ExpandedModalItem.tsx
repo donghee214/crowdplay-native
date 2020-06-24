@@ -47,10 +47,15 @@ const SongListItem: React.FC<SongListItemProps> = ({ data, image, queueSong, roo
   }, [addedSongIds])
 
   return (
-    <TouchableOpacity style={styles.listitemContainer} onPress={pressHandler} disabled={clicked}>
+    <TouchableOpacity
+      style={[
+        styles.listitemContainer,
+        clicked ? styles.clickedOpacity : styles.nonClickedOpacity
+      ]}
+      onPress={pressHandler} disabled={clicked}>
       <ImageBackground
         source={{
-          uri: data.album ? data.album.images[data.album.images.length - 1].url : image
+          uri: data.album?.images ? data.album.images[data.album.images.length - 1].url : image
         }}
         style={styles.backgroundImage}
       />
@@ -72,6 +77,12 @@ const SongListItem: React.FC<SongListItemProps> = ({ data, image, queueSong, roo
 }
 
 const styles = StyleSheet.create({
+  clickedOpacity: {
+    opacity: 0.4
+  },
+  nonClickedOpacity: {
+    opacity: 1
+  },
   listitemContainer: {
     display: 'flex',
     justifyContent: 'flex-start',
@@ -101,10 +112,10 @@ const styles = StyleSheet.create({
     flex: 1
   },
   songName: {
-    color: colors.lightBlack
+    color: colors.white
   },
   artistName: {
-    color: colors.lightGrey
+    color: colors.whiteSmoke
   },
   duration: {
     color: colors.green

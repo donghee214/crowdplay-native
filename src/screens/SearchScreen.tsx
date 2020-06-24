@@ -26,7 +26,6 @@ const HEADER_VISIBLE = 60;
 const initialLayout = { width: Dimensions.get('window').width };
 
 const SearchScreen = () => {
-  const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const scrollY: any = useRef(new Animated.Value(0)).current
 

@@ -11,15 +11,17 @@ import {
 import { useQuery, useLazyQuery } from '@apollo/react-hooks'
 import { useNavigation } from '@react-navigation/native';
 import { GET_ME, GET_ROOM, GET_ROOM_LOCAL } from "../graphql/queries"
-import CurrentlyPlaying from '../components/VotingRoom/CurrentlyPlaying'
+import CurrentlyPlaying, { CURRENTLY_PLAYING_HEIGHT } from '../components/VotingRoom/CurrentlyPlaying'
+import TopNavbar, { TOP_NAVBAR_HEIGHT } from '../components/VotingRoom/TopNavbar'
 import colors from '../assets/colors'
 import { textStyles, VotingRoomText } from '../assets/typography'
 import SongList from '../components/VotingRoom/SongList'
+import BottomDrawer from '../HOCs/BottomDrawer'
 
 
 const VotingRoom = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
-  const { token, withRenew, remote, connectRemote } = useContext(SpotifyContext)
+  const { token, withRenew, remote, connectRemote, authenticate } = useContext(SpotifyContext)
   const navigation = useNavigation()
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
   const { data: meData } = useQuery(GET_ME, {
@@ -56,40 +58,47 @@ const VotingRoom = () => {
   }, [isAdmin])
 
   return (
-    <SafeAreaView>
-      <CurrentlyPlaying />
-      {isAdmin ? <Text>admin</Text> : <Text>not admin</Text>}
-      <ScrollView style={styles.scrollViewContainer}>
-        <View style={styles.mainContentContainer}>
-          <View style={styles.topHeader}>
-            <Text style={[textStyles.h1, VotingRoomText.header]}>
-              Up Next
+    <SafeAreaView style={{ flex: 1 }}>
+
+      <TopNavbar />
+      <CurrentlyPlaying isAdmin={isAdmin} />
+      <BottomDrawer>
+        {/* <ScrollView style={styles.scrollViewContainer} bounces={false}>
+          <View style={styles.mainContentContainer}>
+            <View style={styles.topHeader}>
+              <Text style={[textStyles.h1, VotingRoomText.header]}>
+                Up Next
             </Text>
-            <Text style={[textStyles.p, VotingRoomText.description]}>
-              Tap to upvote
+              <Text style={[textStyles.p, VotingRoomText.description]}>
+                Tap to upvote
             </Text>
+            </View>
+            <SongList />
           </View>
-          <SongList />
-        </View>
-      </ScrollView>
+        </ScrollView> */}
+        <SongList />
+      </BottomDrawer>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  buffer: {
+    height: TOP_NAVBAR_HEIGHT + CURRENTLY_PLAYING_HEIGHT,
+    backgroundColor: 'transparent'
+  },
   mainContentContainer: {
     backgroundColor: colors.whiteSmoke,
     borderRadius: 35,
-    alignSelf: 'stretch',
-    display: 'flex',
+    // alignSelf: 'stretch',
+    // display: 'flex',
+    height: 2000,
     width: Dimensions.get('window').width,
-    marginTop: 400,
-    minHeight: Dimensions.get('window').height,
+    zIndex: 2
   },
   scrollViewContainer: {
-    top: 0,
-    left: 0,
     position: 'absolute',
+    height: Dimensions.get('window').height
   },
   text: {
     color: colors.lightGreen
