@@ -88,6 +88,7 @@ const SongList: React.FC<{}> = () => {
         </View>
       }
       numColumns={3}
+      keyExtractor={(item: Song) => item.trackId}
       renderItem={({ item }: { item: Song }) => (
         <MusicTile
           key={item.trackId}
@@ -126,7 +127,6 @@ const SongList: React.FC<{}> = () => {
 const styles = StyleSheet.create({
   mainContentContainer: {
     backgroundColor: colors.whiteSmoke,
-    borderRadius: 35,
     height: 2000,
     width: Dimensions.get('window').width,
     zIndex: 2

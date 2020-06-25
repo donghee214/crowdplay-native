@@ -3,23 +3,28 @@ import SpotifyContext from "../spotify/spotifyContext"
 import {
   View,
   StyleSheet,
-  ScrollView,
-  Text,
   Dimensions,
-  SafeAreaView
+  SafeAreaView,
+  TouchableOpacity,
 } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { useQuery, useLazyQuery } from '@apollo/react-hooks'
 import { useNavigation } from '@react-navigation/native';
 import { GET_ME, GET_ROOM, GET_ROOM_LOCAL } from "../graphql/queries"
 import CurrentlyPlaying, { CURRENTLY_PLAYING_HEIGHT } from '../components/VotingRoom/CurrentlyPlaying'
 import TopNavbar, { TOP_NAVBAR_HEIGHT } from '../components/VotingRoom/TopNavbar'
 import colors from '../assets/colors'
-import { textStyles, VotingRoomText } from '../assets/typography'
 import SongList from '../components/VotingRoom/SongList'
-import BottomDrawer from '../HOCs/BottomDrawer'
+import BottomSheet from 'reanimated-bottom-sheet'
+import UpArrow from '../assets/components/UpArrow'
+import { BlurView } from "@react-native-community/blur";
 
+const HEADER_HEIGHT = 50;
+const windowHeight = Dimensions.get('window').height;
+const TOP_SNAP_POINT = windowHeight * 0.8
 
 const VotingRoom = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
   const { token, withRenew, remote, connectRemote, authenticate } = useContext(SpotifyContext)
   const navigation = useNavigation()
@@ -30,6 +35,8 @@ const VotingRoom = () => {
     },
     fetchPolicy: 'cache-first'
   })
+
+  const fall = new Animated.Value(1)
 
   const [getRoom, { data: roomData }] = useLazyQuery(GET_ROOM, {
     fetchPolicy: 'no-cache'
@@ -59,25 +66,44 @@ const VotingRoom = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-
       <TopNavbar />
       <CurrentlyPlaying isAdmin={isAdmin} />
-      <BottomDrawer>
-        {/* <ScrollView style={styles.scrollViewContainer} bounces={false}>
-          <View style={styles.mainContentContainer}>
-            <View style={styles.topHeader}>
-              <Text style={[textStyles.h1, VotingRoomText.header]}>
-                Up Next
-            </Text>
-              <Text style={[textStyles.p, VotingRoomText.description]}>
-                Tap to upvote
-            </Text>
-            </View>
-            <SongList />
-          </View>
-        </ScrollView> */}
-        <SongList />
-      </BottomDrawer>
+      <Animated.View
+        style={[StyleSheet.absoluteFillObject, {
+          opacity: fall.interpolate({
+            inputRange: [0, 1.1],
+            outputRange: [1, 0]
+          }),
+        }]}
+        pointerEvents="none"
+      >
+        <BlurView
+          style={StyleSheet.absoluteFillObject}
+          blurType="dark"
+          blurAmount={10}
+          reducedTransparencyFallbackColor="white"
+        />
+      </Animated.View>
+      <View style={{ flex: 1 }}>
+        <BottomSheet
+          snapPoints={[TOP_SNAP_POINT, 200]}
+          renderContent={() => <SongList />}
+          onOpenEnd={() => setIsOpen(true)}
+          onCloseEnd={() => setIsOpen(false)}
+          callbackNode={fall}
+          initialSnap={1}
+          borderRadius={20}
+          renderHeader={() => (
+            <TouchableOpacity style={styles.buttonContainer}>
+              <UpArrow
+                fill={isOpen ? colors.white : colors.lightGrey}
+                style={isOpen ? styles.rotation : styles.noRotation}
+              />
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+
     </SafeAreaView>
   )
 }
@@ -107,7 +133,19 @@ const styles = StyleSheet.create({
     display: 'flex',
     paddingHorizontal: 22.5,
     paddingVertical: 27.5
-  }
+  },
+  rotation: {
+    transform: [{ rotate: '180deg' }]
+  },
+  noRotation: {
+    transform: [{ rotate: '0deg' }]
+  },
+  buttonContainer: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    height: HEADER_HEIGHT
+  },
 })
 
 export default VotingRoom
