@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import {
   View,
   StyleSheet,
   ActivityIndicator,
   Text,
-  ImageBackground,
+  Image,
   Dimensions
 } from 'react-native'
 import firestore from '@react-native-firebase/firestore';
@@ -13,10 +13,13 @@ import { useQuery } from '@apollo/react-hooks'
 import { GET_ROOM_LOCAL } from "../..//graphql/queries"
 import { Room, Song, Artist } from '../../types'
 import { textStyles, VotingRoomText } from '../../assets/typography'
+import SpotifyContext from "../../spotify/spotifyContext"
+// import { DRAWER_HEADER_HEIGHT, BOTTOM_SNAP_POINT } from '../../screens/VotingRoom'
+import { DEFAULT_BACKGROUND_SOURCE_IMAGE } from './MusicTile'
 
-export const CURRENTLY_PLAYING_HEIGHT = Dimensions.get('window').height * 0.7
+export const CURRENTLY_PLAYING_HEIGHT = Dimensions.get('window').height * 0.8
 
-interface CurrentlyPlayingProps{
+interface CurrentlyPlayingProps {
   isAdmin: boolean
 }
 
@@ -24,18 +27,19 @@ const CurrentlyPlaying: React.FC<CurrentlyPlayingProps> = ({
   isAdmin
 }) => {
   const [loading, setLoading] = useState(true)
-  const [currentSong, setCurrentSong] = useState<Song | undefined>(undefined)
+  const [room, setRoom] = useState<Room | undefined>(undefined)
   const [hasSong, setHasSong] = useState<boolean | undefined>()
   const [vibrantColour, setVibrantColour] = useState<number[]>([255, 255, 255])
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
+  const { isConnected } = useContext(SpotifyContext)
 
   useEffect(() => {
     const unsub = firestore().doc(`rooms/${dataRoomId.roomId}`).onSnapshot((doc) => {
       const room = doc.data() as Room
       setVibrantColour(room?.vibrantColour || [255, 255, 255])
+      setRoom(room)
       if (room.currentSong) {
         setHasSong(true)
-        setCurrentSong(room.currentSong)
       }
       else {
         setHasSong(false)
@@ -47,28 +51,23 @@ const CurrentlyPlaying: React.FC<CurrentlyPlayingProps> = ({
   return (
     <View style={styles.currentlyPlaying}>
       <ActivityIndicator size={'large'} style={styles.loading} animating={hasSong === undefined} />
-      {currentSong ?
-        <React.Fragment>
-          <ImageBackground source={currentSong.song.album.images.slice(-1)[0]} />
-          <View>
-            <Text>
-              {currentSong.song.name}
-            </Text>
-            <Text>
-              {currentSong.song.artists.map((artist: Artist) => artist.name).join(', ')}
-            </Text>
-          </View>
-        </React.Fragment> 
-        : 
-        <View>
-          <Text style={[VotingRoomText.header, textStyles.h2, styles.center]}>
-            Currently no song playing
-          </Text>
-          <Text style={[textStyles.p, VotingRoomText.description, styles.center]}>
-            {isAdmin ? 'Hit the play button to start!' : 'Ask the host to start playin!'}
-          </Text>
-        </View>
-      }
+      <Image
+        style={styles.image}
+        source={{
+          uri: room?.currentSong ? room?.currentSong.song.album.images[0].url : DEFAULT_BACKGROUND_SOURCE_IMAGE
+        }} />
+      <View style={styles.textContainer}>
+        <Text style={[VotingRoomText.header, textStyles.h2, styles.center]}>
+          {room?.currentSong ? room?.currentSong.song.name : "Currently no song playing"}
+        </Text>
+        <Text style={[textStyles.p, VotingRoomText.description, styles.center]}>
+          {room?.currentSong ?
+            room?.currentSong.song.artists.map((artist: Artist) => artist.name).join(', ') :
+            isAdmin ? 'Hit the play button to start!' : 'Ask the host to start playin!'
+          }
+        </Text>
+      </View>
+      {(isAdmin && isConnected) && <Controls room={room}/>}
     </View>
   )
 }
@@ -78,9 +77,16 @@ const styles = StyleSheet.create({
   currentlyPlaying: {
     width: '100%',
     height: CURRENTLY_PLAYING_HEIGHT,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    paddingBottom: 100 + 40
+  },
+  image: {
+    width: 250,
+    height: 250,
+    borderRadius: 15,
+    marginVertical: 20
   },
   backgroundImage: {
     width: 300,
@@ -91,8 +97,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 200
   },
-  center:{
+  center: {
     textAlign: 'center'
+  },
+  textContainer:{
+    marginBottom: 30
   }
 })
 

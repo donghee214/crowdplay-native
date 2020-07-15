@@ -16,6 +16,7 @@ export const GET_SEARCH = gql`
       }
       tracks{
         id
+        uri
         name
         artists{
           name
@@ -132,6 +133,7 @@ export const GET_ALBUM_TRACKS = gql`
       tracks{
         id
         name
+        uri
         album{
           images{
             height
@@ -157,6 +159,7 @@ export const GET_PLAYLIST_TRACKS = gql`
       tracks{
         id
         name
+        uri
         artists{
           id
           name
@@ -183,6 +186,7 @@ export const GET_ARTIST_TRACKS = gql`
       tracks{
         id
         name
+        uri
         artists{
           id
           name

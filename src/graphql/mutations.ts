@@ -19,3 +19,9 @@ export const CREATE_ROOM = gql`
       }
     }
 `
+
+export const NEXT_SONG = gql`
+    mutation NextSong($roomId: ID!){
+        nextSong(roomId: $roomId)
+    }
+`

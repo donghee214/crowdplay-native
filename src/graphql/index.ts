@@ -2,7 +2,7 @@ import ApolloClient from 'apollo-boost';
 import { InMemoryCache } from 'apollo-boost';
 import { BACKEND_URL } from 'react-native-dotenv'
 
-
+console.log('fdsf', BACKEND_URL)
 
 const cache = new InMemoryCache({
   addTypename: false

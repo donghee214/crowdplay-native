@@ -69,6 +69,7 @@ export const JoinRoom = () => {
         value={joinRoomInput}
         onChangeText={(text: string) => setJoinRoomInput(text)}
         placeholder={"Enter Room Name"}
+        placeholderTextColor={colors.lightestGrey}
       />
       {joinRoomError && (
         <Text style={styles.errorMessage}>{joinRoomError.message}</Text>
@@ -132,6 +133,7 @@ export const CreateRoom = () => {
         value={createRoomInput}
         onChangeText={(text: string) => setCreateRoomInput(text)}
         placeholder={"Enter Room Name"}
+        placeholderTextColor={colors.lightestGrey}
       />
       {createRoomError && (
         <Text style={styles.errorMessage}>{createRoomError.message}</Text>
@@ -165,7 +167,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.lightBlack,
     paddingHorizontal: 1,
     paddingVertical: 4,
-    fontFamily: fonts.sourceSansProRegular
+    fontFamily: fonts.sourceSansProRegular,
+    color: colors.lightBlack,
   },
   buttonContainer: {
     marginVertical: 25

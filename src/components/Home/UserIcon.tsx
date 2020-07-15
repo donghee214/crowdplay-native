@@ -25,8 +25,7 @@ const UserIcon = () => {
   })
 
   useEffect(() => {
-    console.log('token from userIcon', token)
-    if(token){
+    if(token && !data){
       getMe({
         variables: {
           accessToken: token

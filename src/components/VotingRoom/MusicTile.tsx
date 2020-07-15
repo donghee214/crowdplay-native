@@ -8,15 +8,13 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native'
-import { useApolloClient } from "@apollo/react-hooks";
 import { SpotifySong, Song, Playlist, Album, Artist, Image } from "../../types";
 import { useQuery } from '@apollo/react-hooks'
-import WithQueueSong from "../../HOCs/WithQueueSong"
+import useQueueSong from "../../hooks/useQueueSong"
 import { getUniqueId } from 'react-native-device-info';
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { GET_ADDED_SONG_IDS } from "../../graphql/queries"
-import { color } from "react-native-reanimated";
 import colors from "../../assets/colors";
 import { textStyles } from "../../assets/typography";
 
@@ -30,12 +28,10 @@ export enum TILE_TYPES {
 
 export interface Props {
   data: SpotifySong | Playlist | Album | Artist;
-  large: boolean;
   roomId: string;
   score?: number;
   voters?: string[];
   tileType: TILE_TYPES;
-  queueSong: Function;
 }
 
 interface TileProps {
@@ -50,10 +46,11 @@ interface TileProps {
 const DEFAULT_BACKGROUND_SOURCE_IMAGE = 'https://tr.rbxcdn.com/722e50adb353073b1e7c665e89d3423b/420/420/Decal/Png'
 
 //TODO: REFACTOR INTO A CONTAINER COMPONENT, ONE FOR RECS THE OTHER FOR ADDED SONGS
-const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: Props) => {
+const MusicTile = ({ data, roomId, score, tileType, voters }: Props) => {
   const navigation = useNavigation()
+  const queueSong = useQueueSong()
   const fadeAnim = new Animated.Value(0)
-  const [clicked, setClicked] = useState(false)
+  const [clicked, setClicked] = useState<boolean>()
   const { data: addedSongIds } = useQuery(GET_ADDED_SONG_IDS)
 
   const [tile, setTile] = useState<TileProps>({
@@ -105,6 +102,14 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
     }).start();
   }
 
+  const animateClicked = () => {
+    Animated.timing(fadeAnim, {
+      useNativeDriver: true,
+      toValue: 0.2,
+      duration: 250
+    }).start();
+  }
+
   useEffect(() => {
     if (addedSongIds) {
       if (addedSongIds.songs.includes(data.id)) {
@@ -139,13 +144,13 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
         })
         break
       case (TILE_TYPES.TRACK):
-        data = data as SpotifySong
+        const track: SpotifySong = data as SpotifySong
         setTile({
-          clickEvent: ({ clicked }: { clicked: boolean }) => queueSong(data, roomId, clicked),
+          clickEvent: ({ clicked }: { clicked: boolean }) => queueSong(track, roomId, clicked),
           body: undefined,
-          mainText: data.name,
-          subText: data.artists[0].name,
-          imageURL: getOptimalImage(data.album.images),
+          mainText: track.name,
+          subText: track.artists[0].name,
+          imageURL: getOptimalImage(track.album.images),
           type: TILE_TYPES.TRACK
         })
         break
@@ -185,17 +190,20 @@ const MusicTile = ({ data, large, roomId, score, tileType, voters, queueSong }: 
       default:
         throw ("unrecognized tile type!")
     }
-  }, [data, clicked])
+  }, [data])
 
   return (
-    <Animated.View style={{ opacity: fadeAnim }}>
+    <Animated.View style={{ opacity: clicked ? 0.2: fadeAnim }}>
       <TouchableOpacity
-        onPress={() => tile.clickEvent({ ...tile, clicked })}
-        disabled={!TILE_TYPES.ADDED_TRACK && clicked}
+        onPress={() => { 
+          animateClicked()
+          tile.clickEvent({ ...tile, clicked })}
+        }
+        disabled={clicked}
         style={[
           (tileType === TILE_TYPES.TRACK || tileType === TILE_TYPES.ADDED_TRACK) ? styles.buttonSizeSmall : styles.buttonSizeMed,
           styles.button,
-          clicked ? styles.clickedOpacity : styles.nonClickedOpacity,
+          // clicked ? styles.clickedOpacity : styles.nonClickedOpacity,
         ]}
       >
         <ImageBackground
@@ -296,4 +304,4 @@ const styles = StyleSheet.create({
 
 
 
-export default WithQueueSong(MusicTile)
+export default MusicTile

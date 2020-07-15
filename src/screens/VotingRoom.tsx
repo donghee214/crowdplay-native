@@ -6,28 +6,27 @@ import {
   Dimensions,
   SafeAreaView,
   TouchableOpacity,
+  TouchableWithoutFeedback
 } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useQuery, useLazyQuery } from '@apollo/react-hooks'
-import { useNavigation } from '@react-navigation/native';
+
 import { GET_ME, GET_ROOM, GET_ROOM_LOCAL } from "../graphql/queries"
 import CurrentlyPlaying, { CURRENTLY_PLAYING_HEIGHT } from '../components/VotingRoom/CurrentlyPlaying'
-import TopNavbar, { TOP_NAVBAR_HEIGHT } from '../components/VotingRoom/TopNavbar'
+import TopNavbar from '../components/VotingRoom/TopNavbar'
 import colors from '../assets/colors'
 import SongList from '../components/VotingRoom/SongList'
 import BottomSheet from 'reanimated-bottom-sheet'
-import UpArrow from '../assets/components/UpArrow'
-import { BlurView } from "@react-native-community/blur";
 
-const HEADER_HEIGHT = 50;
-const windowHeight = Dimensions.get('window').height;
-const TOP_SNAP_POINT = windowHeight * 0.8
+export const DRAWER_HEADER_HEIGHT = 40
+export const BOTTOM_SNAP_POINT = 100
+const TOP_SNAP_POINT = CURRENTLY_PLAYING_HEIGHT
+
 
 const VotingRoom = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
-  const { token, withRenew, remote, connectRemote, authenticate } = useContext(SpotifyContext)
-  const navigation = useNavigation()
+  const { token, withRenew, remote, authenticate } = useContext(SpotifyContext)
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
   const { data: meData } = useQuery(GET_ME, {
     variables: {
@@ -58,70 +57,95 @@ const VotingRoom = () => {
     }
   }, [meData, roomData])
 
-  useEffect(() => {
-    if (isAdmin) {
-      // connectRemote()
-    }
-  }, [isAdmin])
+  const renderHandler = () => {
+    const animatedBar1Rotation = (outputRange: number[]) =>
+      Animated.interpolate(fall, {
+        inputRange: [0, 1],
+        outputRange: outputRange,
+        extrapolate: Animated.Extrapolate.CLAMP,
+      })
+
+    return (
+      <View style={styles.handlerContainer}>
+        <Animated.View
+          style={[
+            styles.handlerBar,
+            {
+              left: -7.5,
+              transform: [
+                {
+                  rotate: Animated.concat(
+                    // @ts-ignore
+                    animatedBar1Rotation([0.3, 0]),
+                    'rad'
+                  ),
+                },
+              ],
+            },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.handlerBar,
+            {
+              right: -7.5,
+              transform: [
+                {
+                  rotate: Animated.concat(
+                    // @ts-ignore
+                    animatedBar1Rotation([-0.3, 0]),
+                    'rad'
+                  ),
+                },
+              ],
+            },
+          ]}
+        />
+      </View>
+    )
+  }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
+      {/* WORKAROUND FOR SAFEAREAVIEW NOT WORKING WITH BOTTOMSHEET  */}
+      <View style={{ height: 44 }} />
       <TopNavbar />
       <CurrentlyPlaying isAdmin={isAdmin} />
+
       <Animated.View
         style={[StyleSheet.absoluteFillObject, {
           opacity: fall.interpolate({
-            inputRange: [0, 1.1],
-            outputRange: [1, 0]
+            inputRange: [-0.2, 1],
+            outputRange: [1, 0],
+            extrapolate: Animated.Extrapolate.CLAMP
           }),
+          backgroundColor: 'black',
         }]}
         pointerEvents="none"
       >
-        <BlurView
-          style={StyleSheet.absoluteFillObject}
-          blurType="dark"
-          blurAmount={10}
-          reducedTransparencyFallbackColor="white"
-        />
       </Animated.View>
-      <View style={{ flex: 1 }}>
-        <BottomSheet
-          snapPoints={[TOP_SNAP_POINT, 200]}
-          renderContent={() => <SongList />}
-          onOpenEnd={() => setIsOpen(true)}
-          onCloseEnd={() => setIsOpen(false)}
-          callbackNode={fall}
-          initialSnap={1}
-          borderRadius={20}
-          renderHeader={() => (
-            <TouchableOpacity style={styles.buttonContainer}>
-              <UpArrow
-                fill={isOpen ? colors.white : colors.lightGrey}
-                style={isOpen ? styles.rotation : styles.noRotation}
-              />
+      <BottomSheet
+        snapPoints={[TOP_SNAP_POINT, BOTTOM_SNAP_POINT]}
+        renderContent={() => <SongList />}
+        onOpenEnd={() => setIsOpen(true)}
+        onCloseEnd={() => setIsOpen(false)}
+        callbackNode={fall}
+        initialSnap={1}
+        borderRadius={20}
+        renderHeader={() => (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity>
+              {renderHandler()}
             </TouchableOpacity>
-          )}
-        />
-      </View>
+          </View>
+        )}
+      />
+    </View>
 
-    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  buffer: {
-    height: TOP_NAVBAR_HEIGHT + CURRENTLY_PLAYING_HEIGHT,
-    backgroundColor: 'transparent'
-  },
-  mainContentContainer: {
-    backgroundColor: colors.whiteSmoke,
-    borderRadius: 35,
-    // alignSelf: 'stretch',
-    // display: 'flex',
-    height: 2000,
-    width: Dimensions.get('window').width,
-    zIndex: 2
-  },
   scrollViewContainer: {
     position: 'absolute',
     height: Dimensions.get('window').height
@@ -144,7 +168,23 @@ const styles = StyleSheet.create({
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    height: HEADER_HEIGHT
+    height: DRAWER_HEADER_HEIGHT,
+    // backgroundColor: colors.whiteSmoke,
+  },
+  handlerBar: {
+    position: 'absolute',
+    backgroundColor: '#D1D1D6',
+    top: 5,
+    borderRadius: 3,
+    height: 5,
+    width: 20,
+  },
+  handlerContainer: {
+    position: 'absolute',
+    alignSelf: 'center',
+    top: 10,
+    height: 20,
+    width: 20,
   },
 })
 

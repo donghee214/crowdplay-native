@@ -68,7 +68,7 @@ const ExpandedModal = () => {
       }
       renderItem={({ item }: { item: SpotifySong }) => <ExpandedModalItem
         key={item.id}
-        data={{ ...item, album: item.album ? item.album : route.params.image }}
+        data={{ ...item, album: item.album }}
         type={type}
         roomId={route.params.roomId}
         image={route.params.image}

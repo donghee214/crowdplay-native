@@ -1,17 +1,12 @@
-import React, { useEffect } from "react"
 import { SpotifySong } from "../types";
-import { useQuery, useMutation } from "@apollo/react-hooks"
+import { useMutation } from "@apollo/react-hooks"
 import { ADD_SONG } from "../graphql/mutations"
 import { useApolloClient } from "@apollo/react-hooks";
 import firestore from '@react-native-firebase/firestore'
 
-const WithQueueSong = (Component: any) => (props: any) => {
-    // adding song directly thru firebase
+export default () => {
     const [addSong, { data: addSongData, error: addSongDataError }] = useMutation(ADD_SONG)
     const client = useApolloClient();
-
-
-
     const queueSong = (data: SpotifySong, roomId: string, clicked: boolean) => {
         if (clicked) {
             client.writeData({
@@ -29,7 +24,7 @@ const WithQueueSong = (Component: any) => (props: any) => {
                 data: {
                     toast: {
                         id: data.id,
-                        message: "Song added"
+                        message: `${data.name} added`
                     }
                 }
             })
@@ -41,8 +36,6 @@ const WithQueueSong = (Component: any) => (props: any) => {
             })
         }
     }
-
-    return <Component queueSong={queueSong} {...props} />
+    return queueSong
 }
 
-export default WithQueueSong

@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Text,
   Dimensions,
-  FlatList
+  FlatList,
 } from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import { useQuery } from '@apollo/react-hooks'
@@ -27,8 +27,10 @@ const SongList: React.FC<{}> = () => {
   }
 
   const deleteSongs = (deleteSongs: String[]) => {
-    const newSongs = songs.filter((song) => deleteSongs.includes(song.trackId))
-    setSongs(newSongs)
+    setSongs((songs) => {
+      const newSongs = songs.filter((song) => !deleteSongs.includes(song.trackId))
+      return newSongs
+    })
   }
 
   const modifySongs = (modifySongs: Song[]) => {
@@ -57,7 +59,7 @@ const SongList: React.FC<{}> = () => {
         }
       })
       addSongs(newSongs)
-      // deleteSongs(deletedSongs)
+      deleteSongs(deletedSongs)
       modifySongs(modifiedSongs)
       setLoading(false)
     })
@@ -72,6 +74,7 @@ const SongList: React.FC<{}> = () => {
     })
   }, [songs])
 
+
   return (
     <FlatList
       data={songs}
@@ -81,7 +84,7 @@ const SongList: React.FC<{}> = () => {
         <View style={styles.topHeader}>
           <Text style={[textStyles.h1, VotingRoomText.header]}>
             Up Next
-        </Text>
+          </Text>
           <Text style={[textStyles.p, VotingRoomText.description]}>
             Tap to upvote
         </Text>
@@ -91,7 +94,6 @@ const SongList: React.FC<{}> = () => {
       keyExtractor={(item: Song) => item.trackId}
       renderItem={({ item }: { item: Song }) => (
         <MusicTile
-          key={item.trackId}
           data={item.song}
           score={item.score}
           roomId={dataRoomId.roomId}
@@ -100,42 +102,22 @@ const SongList: React.FC<{}> = () => {
         />
       )}
     />
-    // <View style={styles.songContainer}>
-    //   {songs ?
-    //     songs.map((song: Song) =>
-    //       <MusicTile
-    //         key={song.trackId}
-    //         data={song.song}
-    //         score={song.score}
-    //         roomId={dataRoomId.roomId}
-    //         voters={song.voters}
-    //         tileType={TILE_TYPES.ADDED_TRACK}
-    //       />) : 
-    //       <View>
-    //         <Text>
-    //           No songs added yet
-    //         </Text>
-    //         <Text>
-
-    //         </Text>
-    //       </View>
-    //     }
-    // </View>
   )
 }
 
 const styles = StyleSheet.create({
   mainContentContainer: {
     backgroundColor: colors.whiteSmoke,
-    height: 2000,
     width: Dimensions.get('window').width,
-    zIndex: 2
+    zIndex: 2,
+    minHeight: Dimensions.get('window').height
   },
   topHeader: {
     display: 'flex',
     paddingHorizontal: 22.5,
     paddingVertical: 27.5
-  }
+  },
+  
 })
 
 export default SongList

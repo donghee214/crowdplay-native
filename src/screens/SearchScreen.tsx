@@ -9,9 +9,7 @@ import {
   Animated,
   Dimensions
 } from 'react-native'
-import usePrevious from '../hooks/usePrevious'
-import { useQuery } from '@apollo/react-hooks'
-import { GET_ROOM_LOCAL } from "../graphql/queries"
+
 import { textStyles, VotingRoomText, fonts, sizes } from '../assets/typography'
 
 import SearchResults from '../components/Search/SearchResults'
@@ -169,7 +167,7 @@ const SearchScreen = () => {
         <TabBar
           {...props}
           indicatorStyle={{ backgroundColor: colors.green }}
-          style={{ backgroundColor: colors.whiteSmoke }}
+          style={{ backgroundColor: colors.white }}
           renderLabel={({ route, focused, color }) => (
             <Text style={[
               textStyles.h3,
@@ -219,8 +217,7 @@ const SearchScreen = () => {
             onChangeText={setSearchQuery}
             style={styles.searchBar}
             placeholder={"Search for songs, artists, or albums!"}
-          // onFocus={() => focusHandler(true)}
-          // onBlur={() => focusHandler(false)}
+            placeholderTextColor={colors.lightestGrey}
           />
         </View>
       </Animated.View>
@@ -248,7 +245,7 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     paddingVertical: 12.5,
     paddingHorizontal: 12.5,
-    backgroundColor: colors.white,
+    backgroundColor: colors.whiteSmoke,
     fontSize: 14,
     borderRadius: 6,
     color: colors.lightBlack
@@ -259,7 +256,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
-    backgroundColor: colors.whiteSmoke,
+    backgroundColor: colors.white,
     position: 'absolute',
     paddingHorizontal: 20,
   },

@@ -11,18 +11,34 @@ import { GET_ROOM_LOCAL } from "../../graphql/queries"
 import { useQuery } from '@apollo/react-hooks'
 import { textStyles, VotingRoomText } from '../../assets/typography'
 import colors from '../../assets/colors'
+import Clipboard from "@react-native-community/clipboard";
+import { useApolloClient } from "@apollo/react-hooks";
 
 export const TOP_NAVBAR_HEIGHT = 50
 
 const TopNavbar = () => {
   const navigation = useNavigation()
+  const client = useApolloClient()
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
+
+  const copyToClipboard = () => {
+    Clipboard.setString(`http://crowdplay/${dataRoomId.roomId}`)
+    client.writeData({
+      data: {
+          toast: {
+              id: Math.random(),
+              message: "URL Copied to Clipboard"
+          }
+      }
+  })
+  }
+
   return (
     <View style={styles.container} pointerEvents="auto">
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <BackButton fill={colors.lightBlack}/>
+      <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.backButton}>
+        <BackButton fill={colors.lightBlack} />
       </TouchableOpacity>
-      <View >
+      <View>
         <Text style={[textStyles.p, VotingRoomText.description, styles.center]}>
           Room name
         </Text>
@@ -30,7 +46,13 @@ const TopNavbar = () => {
           {dataRoomId.roomId}
         </Text>
       </View>
-
+      <View>
+        <TouchableOpacity onPress={copyToClipboard}>
+          <Text>
+            Share
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -41,7 +63,8 @@ const styles = StyleSheet.create({
     height: TOP_NAVBAR_HEIGHT,
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15
   },
   roomName: {
     color: colors.lightBlack
@@ -50,7 +73,6 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   backButton: {
-    position: 'absolute',
     zIndex: 1
   }
 })

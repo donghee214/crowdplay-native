@@ -4,9 +4,11 @@ import {
   Text,
   StyleSheet,
   Animated,
-  ActivityIndicator
+  ActivityIndicator,
+  Keyboard,
+  TouchableWithoutFeedback
 } from 'react-native'
-import { GET_SEARCH, GET_ROOM_LOCAL } from "../../graphql/queries"
+import { GET_SEARCH, GET_ROOM_LOCAL, GET_ADDED_SONG_IDS } from "../../graphql/queries"
 import { useLazyQuery, useQuery } from '@apollo/react-hooks'
 import { VotingRoomText, textStyles } from '../../assets/typography'
 import MusicTile, { TILE_TYPES } from '../VotingRoom/MusicTile'
@@ -31,7 +33,6 @@ interface SearchResultsProps {
   onScrollEndDrag: () => void
   onGetRef: (ref: any) => void
 }
-
 
 const SearchResults: React.FC<SearchResultsProps> = ({
   searchQuery,
@@ -84,7 +85,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   return (
     <React.Fragment>
-      { getSearchLoading && <ActivityIndicator style={styles.loading} />}
+      {getSearchLoading && <ActivityIndicator style={styles.loading} />}
       <Animated.FlatList
         contentContainerStyle={{
           paddingTop: HEADER_HEIGHT + TAB_BAR_HEIGHT,
@@ -93,23 +94,22 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         onScrollEndDrag={onScrollEndDrag}
         data={getData()}
         numColumns={type === TILE_TYPES.TRACK ? 3 : 2}
+        onScrollBeginDrag={Keyboard.dismiss}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true },
         )}
         ref={onGetRef}
-        keyExtractor={( item: SpotifySong ) => item.id }
+        keyExtractor={(item: SpotifySong, index: number) => item.id}
         renderItem={({ item }: { item: SpotifySong }) => (
           <MusicTile
             data={item}
             roomId={dataRoomId.roomId}
             tileType={type}
-            key={item.id}
           />
         )}
       />
     </React.Fragment>
-
   )
 }
 
@@ -124,4 +124,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default SearchResults
+export default React.memo(SearchResults)
