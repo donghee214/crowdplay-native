@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -43,7 +43,7 @@ interface TileProps {
   type: TILE_TYPES;
 }
 
-const DEFAULT_BACKGROUND_SOURCE_IMAGE = 'https://tr.rbxcdn.com/722e50adb353073b1e7c665e89d3423b/420/420/Decal/Png'
+export const DEFAULT_BACKGROUND_SOURCE_IMAGE = 'https://tr.rbxcdn.com/722e50adb353073b1e7c665e89d3423b/420/420/Decal/Png'
 
 //TODO: REFACTOR INTO A CONTAINER COMPONENT, ONE FOR RECS THE OTHER FOR ADDED SONGS
 const MusicTile = ({ data, roomId, score, tileType, voters }: Props) => {
@@ -90,7 +90,7 @@ const MusicTile = ({ data, roomId, score, tileType, voters }: Props) => {
       secondaryLabel: subText,
       image: imageURL,
       type,
-      album: type === TILE_TYPES.ALBUM ? data : { images: { height: null, width: null, url: null } }
+      album: type === TILE_TYPES.ALBUM ? data : null
     })
   }
 
@@ -111,13 +111,17 @@ const MusicTile = ({ data, roomId, score, tileType, voters }: Props) => {
   }
 
   useEffect(() => {
-    if (addedSongIds) {
+    if(!addedSongIds){
+      return
+    }
+    if (tileType === TILE_TYPES.TRACK) {
       if (addedSongIds.songs.includes(data.id)) {
         setClicked(true)
       }
       else {
         setClicked(false)
       }
+      return
     }
   }, [addedSongIds])
 
@@ -131,15 +135,15 @@ const MusicTile = ({ data, roomId, score, tileType, voters }: Props) => {
     }
     switch (tileType) {
       case (TILE_TYPES.ADDED_TRACK):
-        const clicked = voters && voters.includes(getUniqueId())
-        setClicked(clicked ? true : false)
+        const isVotedFor = voters && voters.includes(getUniqueId())
+        setClicked(!!isVotedFor)
         data = data as SpotifySong
         setTile({
           clickEvent: ({ clicked }: { clicked: boolean }) => clicked ? downvote() : upvote(),
           body: (score || 0),
           mainText: data.name,
           subText: data.artists[0].name,
-          imageURL: getOptimalImage(data.album.images),
+          imageURL: getOptimalImage(data?.album?.images),
           type: TILE_TYPES.ADDED_TRACK
         })
         break
@@ -304,4 +308,4 @@ const styles = StyleSheet.create({
 
 
 
-export default MusicTile
+export default React.memo(MusicTile)

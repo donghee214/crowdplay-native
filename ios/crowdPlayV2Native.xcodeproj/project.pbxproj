@@ -10,7 +10,6 @@
 		00E356F31AD99517003FC87E /* crowdPlayV2NativeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* crowdPlayV2NativeTests.m */; };
 		089EE5A9A9594564AEA1873C /* SourceSansPro-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FDCDDCA8D2244F9AA98FFE24 /* SourceSansPro-BlackItalic.ttf */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
-		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		140F3275239C4EB99E03317B /* Montserrat-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 744BC20AC65C47E9A6AB00CD /* Montserrat-ThinItalic.ttf */; };
@@ -39,6 +38,7 @@
 		9A65BB1598E84548AD65D767 /* SourceSansPro-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5F350F7DCDC4463880736F5 /* SourceSansPro-Bold.ttf */; };
 		A38497593FA14F2A823C7809 /* SourceSansPro-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9243380579554387AC43DFD8 /* SourceSansPro-ExtraLight.ttf */; };
 		AB5018A62468B0630014A501 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AB5018A52468B0630014A501 /* GoogleService-Info.plist */; };
+		AB5E77F124D78C170098F3B4 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = AB5E77F024D78C170098F3B4 /* LaunchScreen.xib */; };
 		ABD2D80E24B295C4006F7676 /* silence.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = ABD2D80D24B295C4006F7676 /* silence.mp3 */; };
 		B2B6056BDBA34593A9638333 /* Montserrat-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 57F8207457EA43379F4D90A9 /* Montserrat-Medium.ttf */; };
 		B943DCABD9104BE588788DA0 /* Montserrat-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A3C39E18A0A844A28EF382F3 /* Montserrat-Italic.ttf */; };
@@ -81,7 +81,6 @@
 		13B07F961A680F5B00A75B9A /* crowdPlayV2Native.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = crowdPlayV2Native.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = crowdPlayV2Native/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = crowdPlayV2Native/AppDelegate.m; sourceTree = "<group>"; };
-		13B07FB21A68108700A75B9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = crowdPlayV2Native/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = crowdPlayV2Native/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = crowdPlayV2Native/main.m; sourceTree = "<group>"; };
@@ -114,6 +113,7 @@
 		A904BB55BA0B459C975FB305 /* Montserrat-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Black.ttf"; path = "../src/assets/fonts/Montserrat-Black.ttf"; sourceTree = "<group>"; };
 		AA0E3833806A4B59BA81B98F /* SourceSansPro-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSansPro-BoldItalic.ttf"; path = "../src/assets/fonts/SourceSansPro-BoldItalic.ttf"; sourceTree = "<group>"; };
 		AB5018A52468B0630014A501 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		AB5E77F024D78C170098F3B4 /* LaunchScreen.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
 		ABD2D80D24B295C4006F7676 /* silence.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = silence.mp3; sourceTree = "<group>"; };
 		ACE37D19EFE64F5FBAEE2A20 /* SourceSansPro-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSansPro-SemiBoldItalic.ttf"; path = "../src/assets/fonts/SourceSansPro-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		CD312C0FEF6FC55ADBCFC34F /* libPods-crowdPlayV2Native-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-crowdPlayV2Native-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -194,8 +194,8 @@
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
-				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				AB5E77F024D78C170098F3B4 /* LaunchScreen.xib */,
 			);
 			name = crowdPlayV2Native;
 			sourceTree = "<group>";
@@ -447,7 +447,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				49813343E99E4109A5CA9700 /* Montserrat-Black.ttf in Resources */,
 				3F3E1F18BA16441FBC8AD88B /* Montserrat-BlackItalic.ttf in Resources */,
 				C7B2EAC4F7994ACB82F27718 /* Montserrat-Bold.ttf in Resources */,
@@ -467,6 +466,7 @@
 				9097DD77A4014B2EB44E84C9 /* Montserrat-SemiBoldItalic.ttf in Resources */,
 				C3F7CB557212475AB465BA2B /* Montserrat-Thin.ttf in Resources */,
 				140F3275239C4EB99E03317B /* Montserrat-ThinItalic.ttf in Resources */,
+				AB5E77F124D78C170098F3B4 /* LaunchScreen.xib in Resources */,
 				C988C8A28DB440B5B410DFBC /* SourceSansPro-Black.ttf in Resources */,
 				089EE5A9A9594564AEA1873C /* SourceSansPro-BlackItalic.ttf in Resources */,
 				9A65BB1598E84548AD65D767 /* SourceSansPro-Bold.ttf in Resources */,
@@ -753,18 +753,6 @@
 		};
 /* End PBXTargetDependency section */
 
-/* Begin PBXVariantGroup section */
-		13B07FB11A68108700A75B9A /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				13B07FB21A68108700A75B9A /* Base */,
-			);
-			name = LaunchScreen.xib;
-			path = crowdPlayV2Native;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -817,7 +805,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.2;
 				DEVELOPMENT_TEAM = PHCQBG32UW;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -845,7 +833,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.2;
 				DEVELOPMENT_TEAM = PHCQBG32UW;
 				INFOPLIST_FILE = crowdPlayV2Native/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import {
     auth,
@@ -93,6 +93,7 @@ const SpotifyContextProvider: React.FC = props => {
                 .on("playerStateChanged", onPlayerStateChanged)
         })()
         return () => {
+            remote.pause()
             remote.removeAllListeners()
         }
     }, [])
@@ -151,6 +152,7 @@ const SpotifyContextProvider: React.FC = props => {
                     refresh_token: refreshToken
                 })
             })
+            console.log('res',response)
             const refreshedSession = await response.json()
             console.log('setting token', refreshedSession.access_token)
             setToken(refreshedSession.access_token)
@@ -160,7 +162,7 @@ const SpotifyContextProvider: React.FC = props => {
             await authenticate()
         }
     }
-    // AsyncStorage.clear()
+    
     const authenticate = async () => {
         await auth.endSession()
         const session = await auth.authorize(config)
@@ -171,11 +173,11 @@ const SpotifyContextProvider: React.FC = props => {
     const endSession = async () => {
         await remote.disconnect()
         await auth.endSession()
+        setToken("")
         setIsConnected(false)
     }
 
     const onConnected = () => {
-        console.log('CONNECTED')
         setIsConnected(true)
     }
 
@@ -184,6 +186,7 @@ const SpotifyContextProvider: React.FC = props => {
     }
 
     const onPlayerStateChanged = (playerState: PlayerState) => {
+        console.log('player state changed')
         setPlayerState(playerState)
     };
 
@@ -216,6 +219,8 @@ const SpotifyContextProvider: React.FC = props => {
             }
             const currentPlayerState = await remote.getPlayerState()
             setPlayerState(currentPlayerState)
+            const isConnected = await remote.isConnectedAsync()
+            setIsConnected(isConnected)
         }
     }
 

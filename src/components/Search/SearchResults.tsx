@@ -48,7 +48,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     fetchPolicy: 'no-cache'
   })
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
-
   const getData = () => {
     switch (type) {
       case TILE_TYPES.TRACK:

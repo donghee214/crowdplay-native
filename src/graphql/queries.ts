@@ -279,6 +279,12 @@ export const GET_ROOM_LOCAL = gql`
   }
 `
 
+export const GET_USER_HOST_ROOMID = gql`
+  {
+    userHostRoomId @client
+  }
+`
+
 export const GET_BROWSE_INFO = gql`
   {
     browse @client{

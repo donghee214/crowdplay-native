@@ -14,7 +14,6 @@ import colors from "../assets/colors"
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { JoinRoom, CreateRoom } from "../components/Home/JoinCreateRoom"
-import SpotifyContext from '../spotify/spotifyContext';
 
 const Home = () => {
   return (
@@ -68,7 +67,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sourceSansProRegular
   },
   paddedScreenContainer: {
-    paddingHorizontal: 25
+    paddingHorizontal: 24
   },
   errorMessage: {
     marginTop: 4,

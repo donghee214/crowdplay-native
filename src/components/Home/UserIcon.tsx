@@ -10,7 +10,7 @@ import {
 
 import { GET_ME } from "../../graphql/queries"
 import { useLazyQuery } from '@apollo/react-hooks'
-
+import { useNavigation } from '@react-navigation/native';
 import Account from "../../assets/components/Account"
 import colors from "../../assets/colors"
 import { textStyles } from "../../assets/typography"
@@ -19,23 +19,25 @@ import { getMeResponseType } from "../../screens"
 
 const UserIcon = () => {
   const { token, authenticate } = useContext(SpotifyContext)
-
+  const navigation = useNavigation()
   const [getMe, { loading, data, error }] = useLazyQuery<getMeResponseType>(GET_ME, {
     fetchPolicy: "cache-and-network"
   })
 
   useEffect(() => {
-    if(token && !data){
-      getMe({
-        variables: {
-          accessToken: token
-        }
-      })
-    }
+    getMe({
+      variables: {
+        accessToken: token
+      }
+    })
   }, [token])
 
   const onPressHandler = () => {
-    if(token) Alert.alert("go to settings")
+    if (token) {
+      navigation.navigate("Settings", {
+        me: data?.me
+      })
+    }
     else authenticate()
   }
 
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
     color: colors.green,
     marginTop: 1
   },
-  image:{
+  image: {
     width: 36,
     height: 36,
     borderRadius: 18

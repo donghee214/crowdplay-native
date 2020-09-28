@@ -38,7 +38,8 @@ const ExpandedModal = () => {
     navigation.goBack()
   }
 
-  const renderTracks = (tracks: SpotifySong[], type: TILE_TYPES) => (
+  const renderTracks = (tracks: SpotifySong[], type: TILE_TYPES) => {
+    return (
     <FlatList
       data={tracks}
       style={styles.songListContainer}
@@ -68,13 +69,14 @@ const ExpandedModal = () => {
       }
       renderItem={({ item }: { item: SpotifySong }) => <ExpandedModalItem
         key={item.id}
-        data={{ ...item, album: item.album }}
+        data={{ ...item, album: type === TILE_TYPES.ALBUM ? route.params.album : item.album}}
         type={type}
         roomId={route.params.roomId}
         image={route.params.image}
       />}
     />
   )
+}
 
   useEffect(() => {
     switch (route.params.type) {
@@ -166,8 +168,8 @@ const styles = StyleSheet.create({
   },
   songListContainer: {
     paddingHorizontal: 20,
-    width: '100%',
     flex: 1,
+    width: '100%',
     position: 'relative',
     display: 'flex',
   },
@@ -192,10 +194,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryLabelStyle: {
-    color: colors.white
+    color: colors.white,
+    textAlign: 'center'
   },
   secondaryLabelStyle: {
-    color: colors.offWhite
+    color: colors.offWhite,
+    marginTop: 2,
+    fontSize: 14
   },
 })
 

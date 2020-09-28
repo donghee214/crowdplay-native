@@ -12,6 +12,12 @@ export const UPVOTE_SONG = gql`
     }
 `
 
+export const DELETE_ROOM = gql`
+    mutation DeleteRoom($roomId: ID!){
+        deleteRoom(roomId: $roomId)
+    }
+`
+
 export const CREATE_ROOM = gql`
     mutation AddRoom($roomId: ID!, $admin: UserInput){
       addRoom(id: $roomId, admin: $admin){

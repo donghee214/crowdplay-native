@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Text,
   Dimensions,
-  FlatList,
+  // FlatList,
 } from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import { useQuery } from '@apollo/react-hooks'
@@ -14,10 +14,10 @@ import { useApolloClient } from "@apollo/react-hooks";
 import MusicTile, { TILE_TYPES } from './MusicTile'
 import { textStyles, VotingRoomText } from '../../assets/typography'
 import colors from '../../assets/colors'
+import { FlatList } from 'react-native-gesture-handler'
 
 const SongList: React.FC<{}> = () => {
   const [songs, setSongs] = useState<Song[]>([])
-  const [loading, setLoading] = useState<boolean>()
   const client = useApolloClient()
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
 
@@ -61,7 +61,6 @@ const SongList: React.FC<{}> = () => {
       addSongs(newSongs)
       deleteSongs(deletedSongs)
       modifySongs(modifiedSongs)
-      setLoading(false)
     })
     return () => unsub()
   }, [])
@@ -76,32 +75,35 @@ const SongList: React.FC<{}> = () => {
 
 
   return (
-    <FlatList
-      data={songs}
-      bounces={false}
-      style={styles.mainContentContainer}
-      ListHeaderComponent={
-        <View style={styles.topHeader}>
-          <Text style={[textStyles.h1, VotingRoomText.header]}>
-            Up Next
+      <FlatList
+        data={songs}
+        bounces={false}
+        style={styles.mainContentContainer}
+        contentContainerStyle={{
+          paddingBottom: 250
+        }}
+        ListHeaderComponent={
+          <View style={styles.topHeader}>
+            <Text style={[textStyles.h1, VotingRoomText.header]}>
+              Up Next
           </Text>
-          <Text style={[textStyles.p, VotingRoomText.description]}>
-            Tap to upvote
+            <Text style={[textStyles.p, VotingRoomText.description]}>
+              Tap to upvote
         </Text>
-        </View>
-      }
-      numColumns={3}
-      keyExtractor={(item: Song) => item.trackId}
-      renderItem={({ item }: { item: Song }) => (
-        <MusicTile
-          data={item.song}
-          score={item.score}
-          roomId={dataRoomId.roomId}
-          voters={item.voters}
-          tileType={TILE_TYPES.ADDED_TRACK}
-        />
-      )}
-    />
+          </View>
+        }
+        numColumns={3}
+        keyExtractor={(item: Song) => item.trackId}
+        renderItem={({ item }: { item: Song }) => (
+          <MusicTile
+            data={item.song}
+            score={item.score}
+            roomId={dataRoomId.roomId}
+            voters={item.voters}
+            tileType={TILE_TYPES.ADDED_TRACK}
+          />
+        )}
+      />
   )
 }
 
@@ -110,14 +112,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.whiteSmoke,
     width: Dimensions.get('window').width,
     zIndex: 2,
-    minHeight: Dimensions.get('window').height
+    flexGrow: 1,
+    // flex: 1,
+    minHeight: Dimensions.get('window').height,
+    paddingBottom: 150
   },
   topHeader: {
     display: 'flex',
     paddingHorizontal: 22.5,
     paddingVertical: 27.5
   },
-  
+  // flatlistContainer: {
+  //   minHeight: Dimensions.get('window').height,
+  //   height: 'auto'
+  // }
+
 })
 
 export default SongList

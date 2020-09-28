@@ -17,15 +17,16 @@ import TopNavbar from '../components/VotingRoom/TopNavbar'
 import colors from '../assets/colors'
 import SongList from '../components/VotingRoom/SongList'
 import BottomSheet from 'reanimated-bottom-sheet'
+import { BOTTOM_SNAP_POINT, DRAWER_HEADER_HEIGHT } from '../utils/constants'
+import LinearGradient from 'react-native-linear-gradient';
 
-export const DRAWER_HEADER_HEIGHT = 40
-export const BOTTOM_SNAP_POINT = 100
 const TOP_SNAP_POINT = CURRENTLY_PLAYING_HEIGHT
 
 
 const VotingRoom = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
+  const [vibrantColour, setVibrantColour] = useState<number[]>([255, 255, 255])
   const { token, withRenew, remote, authenticate } = useContext(SpotifyContext)
   const { data: dataRoomId } = useQuery(GET_ROOM_LOCAL)
   const { data: meData } = useQuery(GET_ME, {
@@ -58,60 +59,26 @@ const VotingRoom = () => {
   }, [meData, roomData])
 
   const renderHandler = () => {
-    const animatedBar1Rotation = (outputRange: number[]) =>
-      Animated.interpolate(fall, {
-        inputRange: [0, 1],
-        outputRange: outputRange,
-        extrapolate: Animated.Extrapolate.CLAMP,
-      })
-
     return (
       <View style={styles.handlerContainer}>
-        <Animated.View
-          style={[
-            styles.handlerBar,
-            {
-              left: -7.5,
-              transform: [
-                {
-                  rotate: Animated.concat(
-                    // @ts-ignore
-                    animatedBar1Rotation([0.3, 0]),
-                    'rad'
-                  ),
-                },
-              ],
-            },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.handlerBar,
-            {
-              right: -7.5,
-              transform: [
-                {
-                  rotate: Animated.concat(
-                    // @ts-ignore
-                    animatedBar1Rotation([-0.3, 0]),
-                    'rad'
-                  ),
-                },
-              ],
-            },
-          ]}
-        />
+        <View style={styles.handlerBar} />
       </View>
     )
   }
 
   return (
     <View style={{ flex: 1 }}>
+      <LinearGradient
+        start={{ x: -0.2, y: 0.15 }} end={{ x: 0.35, y: 0.8 }}
+        colors={[
+          `rgba(${vibrantColour[0]}, ${vibrantColour[1]}, ${vibrantColour[2]}, 0.6)`,
+          `rgba(${vibrantColour[0]}, ${vibrantColour[1]}, ${vibrantColour[2]}, 0)`]}
+        style={StyleSheet.absoluteFillObject}
+      />
       {/* WORKAROUND FOR SAFEAREAVIEW NOT WORKING WITH BOTTOMSHEET  */}
       <View style={{ height: 44 }} />
       <TopNavbar />
-      <CurrentlyPlaying isAdmin={isAdmin} />
-
+      <CurrentlyPlaying isAdmin={isAdmin} setVibrantColour={setVibrantColour}/>
       <Animated.View
         style={[StyleSheet.absoluteFillObject, {
           opacity: fall.interpolate({
@@ -174,17 +141,20 @@ const styles = StyleSheet.create({
   handlerBar: {
     position: 'absolute',
     backgroundColor: '#D1D1D6',
-    top: 5,
+    top: 15,
     borderRadius: 3,
     height: 5,
-    width: 20,
+    width: 40,
   },
   handlerContainer: {
     position: 'absolute',
     alignSelf: 'center',
-    top: 10,
-    height: 20,
-    width: 20,
+    top: 40,
+    height: 80,
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    zIndex: 2,
   },
 })
 

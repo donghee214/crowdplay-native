@@ -1,9 +1,9 @@
 import React, { useEffect, useContext } from 'react';
 
 import { NavigationContainer, RouteProp, DefaultTheme } from '@react-navigation/native';
-import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { TransitionSpecs, HeaderStyleInterpolators } from '@react-navigation/stack';
+import Settings from './Settings'
 import Home from "./Home"
 import VotingRoom from "./VotingRoom"
 import ExpandedModal from './ExpandedModal'
@@ -39,16 +39,20 @@ type RootStackParamList = {
       images: Image
     }
   },
-  SearchScreen: undefined
+  Settings: {
+    me: User
+  }
 };
 
 export type HomeRouteProps = RouteProp<RootStackParamList, 'Home'>;
 export type VotingRoomRouteProps = RouteProp<RootStackParamList, 'VotingRoom'>;
 export type ExpandedModalRouteProps = RouteProp<RootStackParamList, 'ExpandedModal'>;
+export type SettingsRouteProps = RouteProp<RootStackParamList, 'Settings'>;
 
 const AppStack = createStackNavigator<RootStackParamList>();
 const SearchStack = createStackNavigator()
 const VotingRoomStack = createStackNavigator()
+const HomeStack = createStackNavigator();
 const Tab = createBottomTabNavigator()
 
 const theme = {
@@ -73,15 +77,22 @@ const VotingRoomStackScreen = () => (
   </VotingRoomStack.Navigator>
 )
 
+const HomeStackScreen = () => (
+  <HomeStack.Navigator>
+    <HomeStack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+    <HomeStack.Screen name="Settings" component={Settings} />
+  </HomeStack.Navigator>
+)
+
 const AppTabs = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
       tabBarIcon: ({ focused, color, size }) => {
-        switch(route.name){
-          case("Room"):
-            return <MusicQueue fill={focused ? colors.green : colors.lightGrey}/>
-          case("Add Song"):
-            return <SearchIcon fill={focused ? colors.green : colors.lightGrey} isSmall={true}/>
+        switch (route.name) {
+          case ("Room"):
+            return <MusicQueue fill={focused ? colors.green : colors.lightGrey} />
+          case ("Add Song"):
+            return <SearchIcon fill={focused ? colors.green : colors.lightGrey} isSmall={true} />
         }
       },
     })}
@@ -124,7 +135,7 @@ const Screens = () => {
   return (
     <NavigationContainer theme={theme}>
       <AppStack.Navigator screenOptions={{ headerShown: false }}>
-        <AppStack.Screen name="Home" component={Home} />
+        <AppStack.Screen name="Home" component={HomeStackScreen} />
         <AppStack.Screen name="VotingRoom" component={AppTabs} />
       </AppStack.Navigator>
     </NavigationContainer>

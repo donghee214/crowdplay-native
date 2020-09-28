@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import RoomTile from "./RoomTile"
 import firestore from '@react-native-firebase/firestore';
+import { textStyles } from '../../assets/typography'
 import { Room } from "../../types"
 
 
@@ -15,8 +16,17 @@ const RoomTileContainer = () => {
   const colors = ["#5756FC", "#E586A3", "#88D1D5", "#59C3C3", "#52489C"]
 
   useEffect(() => {
+    (async () => {
+      const roomsSnapshot = await firestore().collection("rooms").get()
+      const rooms = roomsSnapshot.docs.map((doc): Room => doc.data() as Room)
+      setRooms(rooms)
+    })()
+  }, [])
+
+  useEffect(() => {
       const unsub = firestore().collection("rooms").onSnapshot((snapshot) => {
           let rooms = snapshot.docs.map((doc): Room => doc.data() as Room)
+          console.log(rooms)
           setRooms(rooms)
       })
       return () => unsub()
@@ -27,13 +37,14 @@ const RoomTileContainer = () => {
         return <Text>Loading</Text>
     }
     else if (rooms.length == 0) {
-        return <Text>No rooms found around your area!</Text>
+        return <Text style={[textStyles.h2, styles.textStyle]}>No rooms found around your area!</Text>
     }
     return rooms.map((room: Room, index: any) => (
         <RoomTile
             key={room.id}
             color={colors[index % colors.length]}
-            {...room} />
+            room={room}
+         />
     ))
   }
   return (
@@ -48,6 +59,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     width: "100%"
+  },
+  textStyle: {
+    paddingHorizontal: 24,
+    paddingVertical: 4
   }
 })
 

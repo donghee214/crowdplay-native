@@ -1,0 +1,2 @@
+export const DRAWER_HEADER_HEIGHT = 40
+export const BOTTOM_SNAP_POINT = 150

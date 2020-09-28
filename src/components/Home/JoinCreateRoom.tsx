@@ -8,14 +8,13 @@ import {
 } from 'react-native'
 import SpotifyContext from "../../spotify/spotifyContext"
 
-import Button from "../../assets/components/Button"
+import Button, { BUTTON_TYPE } from "../../assets/components/Button"
 
 import { textStyles, fonts } from "../../assets/typography"
 import colors from "../../assets/colors"
-
 import { useQuery, useMutation, useLazyQuery, useApolloClient } from '@apollo/react-hooks'
-import { GET_ROOM, GET_ME } from "../../graphql/queries"
-import { CREATE_ROOM } from "../../graphql/mutations"
+import { GET_ROOM, GET_ME, GET_USER_HOST_ROOMID } from "../../graphql/queries"
+import { CREATE_ROOM, DELETE_ROOM } from "../../graphql/mutations"
 import { getMeResponseType } from "../../screens"
 import { useNavigation } from '@react-navigation/native';
 
@@ -24,7 +23,7 @@ const sanitize = (str: string) => {
   return str.trim()
 }
 
-const writeRoomIdToCache = ({ client, roomId }:{client: any, roomId: string}) => {
+const writeRoomIdToCache = ({ client, roomId }: { client: any, roomId: string }) => {
   client.writeData({
     data: {
       roomId
@@ -46,7 +45,7 @@ export const JoinRoom = () => {
         roomId: joinRoomData.room.id
       })
       writeRoomIdToCache({
-        client, 
+        client,
         roomId: joinRoomData.room.id
       })
     }
@@ -87,8 +86,10 @@ export const JoinRoom = () => {
 }
 
 export const CreateRoom = () => {
-  const { token, withRenew } = useContext(SpotifyContext)
+  const { token, withRenew, remote } = useContext(SpotifyContext)
+  const { data: userHostRoomIdData } = useQuery(GET_USER_HOST_ROOMID)
   const [createRoomInput, setCreateRoomInput] = useState<string>("")
+  const [deleteRoom, { loading: deleteRoomLoading, data: deleteRoomData, error: deleteRoomError }] = useMutation(DELETE_ROOM)
   const [createRoom, { loading: createRoomLoading, data: createRoomData, error: createRoomError }] = useMutation(CREATE_ROOM)
   const [getMe, { data: meData }] = useLazyQuery<getMeResponseType>(GET_ME, {
     variables: {
@@ -100,9 +101,7 @@ export const CreateRoom = () => {
   const navigation = useNavigation()
 
   useEffect(() => {
-    if (token) {
-      withRenew(getMe)
-    }
+    withRenew(getMe)
   }, [token])
 
   useEffect(() => {
@@ -125,27 +124,89 @@ export const CreateRoom = () => {
     })
   }
 
+  const deleteRoomHandler = async () => {
+    setCreateRoomInput("")
+    deleteRoom({
+      variables: { roomId: userHostRoomIdData.userHostRoomId }
+    })
+    await remote.pause()
+    await remote.disconnect()
+  }
+
+  const goToRoom = () => {
+    navigation.navigate("VotingRoom", {
+      roomId: userHostRoomIdData.userHostRoomId
+    })
+    client.writeData({
+      data: {
+        roomId: userHostRoomIdData.userHostRoomId
+      }
+    })
+  }
+
+  const renderCreateRoom = () => {
+    if (!meData?.me) {
+      return (
+        <Text style={[textStyles.p, styles.message]}>
+          Sign in to create a room
+        </Text>
+      )
+    }
+    if (meData?.me && userHostRoomIdData?.userHostRoomId) {
+      return (
+        <React.Fragment>
+          <TextInput
+            editable={false}
+            selectTextOnFocus={false}
+            style={styles.roomTextInputDisabled}
+            value={"Can only have one active room at a time"}
+            placeholderTextColor={colors.lightestGrey}
+          />
+          <View style={[styles.buttonContainer, styles.inlineButtonContainer]}>
+            <Button onClick={deleteRoomHandler} type={BUTTON_TYPE.SECONDARY}>
+              {deleteRoomLoading ?
+                <ActivityIndicator size="small" color={colors.green} /> :
+                <Text style={[textStyles.p, styles.buttonText, styles.secondaryButtonText]}>Delete Room</Text>
+              }
+            </Button>
+            <Button onClick={goToRoom}>
+              <Text style={[textStyles.p, styles.buttonText]}>Go to Room</Text>
+            </Button>
+          </View>
+        </React.Fragment>
+      )
+    }
+    if (meData?.me) {
+      return (
+        <React.Fragment>
+          <TextInput
+            editable={true}
+            style={styles.roomTextInput}
+            value={createRoomInput}
+            onChangeText={(text: string) => setCreateRoomInput(text)}
+            placeholder={"Enter Room Name"}
+            placeholderTextColor={colors.lightestGrey}
+          />
+          {createRoomError && (
+            <Text style={styles.errorMessage}>{createRoomError.message}</Text>
+          )}
+          <View style={styles.buttonContainer}>
+            <Button onClick={() => createRoomHandler()} disabled={createRoomLoading}>
+              {createRoomLoading ?
+                <ActivityIndicator size="small" color={colors.white} /> :
+                <Text style={[textStyles.p, styles.buttonText]}>Create Room</Text>
+              }
+            </Button>
+          </View>
+        </React.Fragment>
+      )
+    }
+  }
+
   return (
     <React.Fragment>
       <Text style={[textStyles.p, styles.sectionHeader]}>Create Room</Text>
-      <TextInput
-        style={styles.roomTextInput}
-        value={createRoomInput}
-        onChangeText={(text: string) => setCreateRoomInput(text)}
-        placeholder={"Enter Room Name"}
-        placeholderTextColor={colors.lightestGrey}
-      />
-      {createRoomError && (
-        <Text style={styles.errorMessage}>{createRoomError.message}</Text>
-      )}
-      <View style={styles.buttonContainer}>
-        <Button onClick={() => createRoomHandler()} disabled={createRoomLoading}>
-          {createRoomLoading ?
-            <ActivityIndicator size="small" color={colors.white} /> :
-            <Text style={[textStyles.p, styles.buttonText]}>Create Room</Text>
-          }
-        </Button>
-      </View>
+      {renderCreateRoom()}
     </React.Fragment>
   )
 }
@@ -156,12 +217,12 @@ const styles = StyleSheet.create({
     color: colors.red
   },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 16,
     color: colors.lightGrey,
     marginTop: 16,
   },
   roomTextInput: {
-    fontSize: 20,
+    fontSize: 18,
     height: 40,
     borderBottomWidth: 1,
     borderBottomColor: colors.lightBlack,
@@ -170,11 +231,33 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sourceSansProRegular,
     color: colors.lightBlack,
   },
+  roomTextInputDisabled: {
+    fontSize: 18,
+    height: 40,
+    paddingHorizontal: 1,
+    paddingVertical: 4,
+    fontFamily: fonts.sourceSansProRegular,
+    color: colors.lightBlack,
+  },
+  inlineButtonContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flex: 1
+  },
   buttonContainer: {
     marginVertical: 25
   },
+  secondaryButtonText: {
+    color: colors.green
+  },
   buttonText: {
-    fontSize: 20,
+    fontSize: 18,
     color: colors.white
   },
+  message: {
+    fontSize: 22,
+    color: colors.lightBlack,
+    marginVertical: 6
+  }
 });
